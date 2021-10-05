@@ -1,0 +1,21 @@
+{
+  "name": "phasersfs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "phaser": "^3.55.2",
+    "sfs2x-api": "^1.7.18",
+    "webpack": "^5.54.0",
+    "webpack-dev-server": "^4.3.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.8.0"
+  }
+}
