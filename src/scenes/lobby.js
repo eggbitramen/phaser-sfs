@@ -4,6 +4,10 @@ var tutorialText;
 var tutorialTextData;
 var findMatchBtn;
 var findMatchTxt;
+var tutorialCont;
+var findMatchCont;
+
+var menuState = 0; // 0 = tutorial, 1 = find match
 
 export default class Lobby extends Phaser.Scene {
     constructor()
@@ -15,34 +19,42 @@ export default class Lobby extends Phaser.Scene {
     {
         this.add.image(0, 0, 'lobby-bg').setScale(2); //bg
 
-        this.anims.create({
-            key: 'btstate',
-            frames: [
-                { key: 'button-00' },
-                { key: 'button-01' }
-            ],
-            frameRate: 0,
-            repeat: 0
-        });
-        
-        this.anims.create({
-            key: 'txtcmd',
-            frames: [
-                { key: 'sprtxt-start' },
-                { key: 'sprtxt-cancel' },
-                { key: 'sprtxt-rematch' },
-                { key: 'sprtxt-exit' }
-            ],
-            frameRate: 0,
-            repeat: 0
-        });
-
-        findMatchBtn = this.add.sprite(0, 0, 'button-00').play('btstate');
-        findMatchBtn.setOrigin(0.5, 0.5);
-        findMatchTxt = this.add.sprite(0, 0, 'sprtxt-start').play('txtcmd');
-        findMatchTxt.setOrigin(0.5, 0.5);
-        
+        //start button components
+        findMatchBtn = this.add.sprite(0, 0, 'button-00').setOrigin(0.5, 0.5);
         findMatchBtn.setPosition(this.game.width / 2, this.game.height - this.game.height / 5);
+        findMatchBtn.setInteractive();
+        findMatchBtn.on('pointerdown', function (pointer) {
+            lobbyBtnCallback();
+        })
+        
+        findMatchTxt = this.add.sprite(0, 0, 'sprtxt-start').setOrigin(0.5, 0.5);
         findMatchTxt.setPosition(findMatchBtn.x, findMatchBtn.y);
+
+        //tutorial container
+        tutorialCont = this.add.container(this.game.width / 2, this.game.height / 2);
+        tutorialCont.setVisible(false);
+
+        //find match container
+        findMatchCont = this.add.container(this.game.width / 2, this.game.height / 2);
+        findMatchCont.setVisible(false);
+        let findMatchInfo = this.add.text(0, 0, "Finding Match").setOrigin(0.5, 0.5).setFontSize(30).setFontStyle('bold');
+        findMatchCont.add(findMatchInfo);
+    }
+}
+
+function lobbyBtnCallback() {
+    if (menuState == 0)
+    {
+        menuState = 1;
+        findMatchTxt.setTexture('sprtxt-cancel');
+        tutorialCont.setVisible(false);
+        findMatchCont.setVisible(true);
+    }
+    else
+    {
+        menuState = 0;
+        findMatchTxt.setTexture('sprtxt-start');
+        findMatchCont.setVisible(false);
+        tutorialCont.setVisible(true);
     }
 }
