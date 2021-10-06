@@ -3,6 +3,7 @@ import * as SFS2X from 'sfs2x-api'
 
 import Boot from './scenes/boot'
 import Login from './scenes/login'
+import Lobby from './scenes/lobby'
 import MatchWrapper from './scenes/matchwrapper'
 
 //import Boot from ''
@@ -14,14 +15,14 @@ var game_config = {
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 720,
-        height: 1280
+        width: 1280,
+        height: 720
     },
-    scene: [Boot, Login, MatchWrapper]
+    scene: [Boot, Login, Lobby, MatchWrapper]
 }
 
 var game_properties = {
-    game_room_groupname : 'punchout', //sfs group name
+    game_room_groupname : 'headball', //sfs group name
     players : 2 //player needed
 }
 
@@ -94,8 +95,7 @@ function onLoginError(event)
 
 function onLogin(event)
 {
-    console.log(event.user.name);
-	let websiteId = new SFS2X.SFSUserVariable("website_id", game.game_properties.website_id);
+    let websiteId = new SFS2X.SFSUserVariable("website_id", game.game_properties.website_id);
 	let nickname = new SFS2X.SFSUserVariable("nickname", game.game_properties.nickname);
 	let sessionToken = new SFS2X.SFSUserVariable("session_token", game.game_properties.session_token);
 	
@@ -115,12 +115,10 @@ function onRoomJoinError(event)
 
 function onRoomJoin(event)
 {
-    console.log(event);
-
     switch (event.room.name) {
         case "The Lobby":
             game.scene.stop("login");
-            game.scene.start("matchwrapper");
+            game.scene.start("lobby");
             break;
     }
 }

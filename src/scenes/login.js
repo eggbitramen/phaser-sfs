@@ -10,7 +10,6 @@ export default class Login extends Phaser.Scene {
     {
         this.game_properties = this.game.game_properties;
         this.sfs = this.game.sfs;
-        console.log(this);
     }
 
     create()
