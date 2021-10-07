@@ -1,5 +1,3 @@
-let preloadComplete = false
-
 export default class Boot extends Phaser.Scene {
     constructor()
     {
@@ -21,23 +19,21 @@ export default class Boot extends Phaser.Scene {
         this.load.image('sprtxt-exit', 'sprtxt-exit.png');
         this.load.image('sprtxt-rematch', 'sprtxt-rematch.png');
 
-        this.load.on('complete', function () {
-            preloadComplete = true;
+        this.load.once('complete', () => {
+            this.goToLogin();
         });
     }
 
     create()
     {
-        this.add.text(10, 10, "Loading ...");
+
+        //add objects
+        this.add.text(this.game.width / 2, this.game.height / 2, "Loading ...").setOrigin(0.5, 0.5);
     }
 
-    update()
+    goToLogin()
     {
-        if (preloadComplete)
-        {
-            preloadComplete = false;
-            this.scene.stop("boot");
-            this.game.scene.start("login");
-        }
+        this.scene.stop('boot');
+        this.scene.start('login');
     }
 }

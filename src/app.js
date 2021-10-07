@@ -23,5 +23,4 @@ var game_config = {
 }
 
 var sfs = new SFSClient();
-
 var game = new Phaser.Game(game_config);

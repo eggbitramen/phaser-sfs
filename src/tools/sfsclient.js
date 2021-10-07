@@ -1,4 +1,5 @@
-import Phaser from 'phaser'
+import * as SFS2X from 'sfs2x-api'
+import eventManager from './eventmanager';
 
 var sfs;
 
@@ -37,6 +38,9 @@ export default class SFSClient {
         sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN_ERROR, onRoomJoinError, this);
         sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
         sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
+
+        // add sfs event dispatch
+        eventManager.on('connect', this.connect, this);
     }
 
     getProperties() 
@@ -47,6 +51,56 @@ export default class SFSClient {
     getConfig() 
     {
         return sfs_config;
+    }
+
+    connect()
+    {
+        //fetch client data
+        sessionStorage.clear();
+        if (
+        typeof sessionStorage["dewa.uid"] !== "undefined" &&
+        typeof sessionStorage["dewa.roomid"] !== "undefined"
+        )
+        {
+            game_properties.user_id = sessionStorage.getItem("dewa.uid");
+            game_properties.session_token = sessionStorage.getItem("dewa.session_token");
+            game_properties.game_id = sessionStorage.getItem("dewa.game_id");
+            game_properties.website_id = sessionStorage.getItem("dewa.website_id");
+            game_properties.nickname = sessionStorage.getItem("dewa.username");
+            game_properties.tournamentId = parseInt(sessionStorage.getItem("dewa.roomid"));
+            game_properties.fee = sessionStorage.getItem("dewa.fee");
+            game_properties.prize = sessionStorage.getItem("dewa.prize");
+            game_properties.isBotAllowed = parseInt(sessionStorage.getItem("dewa.bot"));
+        }
+        else{
+            sessionStorage.setItem("dewa.uid", "UserTest" + Math.floor(Math.random() * 50));
+            sessionStorage.setItem("dewa.game_id", 11);
+            sessionStorage.setItem("dewa.website_id", 1);
+            sessionStorage.setItem("dewa.username", sessionStorage.getItem("dewa.uid") + "-nickname");
+            sessionStorage.setItem("dewa.roomid", 10);
+            
+            game_properties.user_id = sessionStorage.getItem("dewa.uid");
+            game_properties.game_id = sessionStorage.getItem("dewa.game_id");
+            game_properties.website_id = sessionStorage.getItem("dewa.website_id");
+            game_properties.nickname = sessionStorage.getItem("dewa.username");
+            game_properties.tournamentId = parseInt(sessionStorage.getItem("dewa.roomid"));
+            
+            game_properties.isBotAllowed = 1;
+        }
+        
+        if (sfs.isConnected)
+        {
+            this.login();
+        }
+        else
+        {
+            sfs.connect();
+        }
+    }
+
+    login()
+    {
+        sfs.send(new SFS2X.LoginRequest(game_properties.user_id));
     }
 }
 
@@ -75,7 +129,7 @@ function onErrorLogged(event)
 function onConnection(event)
 {
     console.log("Connected");
-    sfs.send(new SFS2X.LoginRequest(game.game_properties.user_id));
+    sfs.send(new SFS2X.LoginRequest(game_properties.user_id));
 }
 
 function onConnectionLost(event)
@@ -113,8 +167,7 @@ function onRoomJoin(event)
 {
     switch (event.room.name) {
         case "The Lobby":
-            game.scene.stop("login");
-            game.scene.start("lobby");
+            eventManager.emit('enter-loby');
             break;
     }
 }
