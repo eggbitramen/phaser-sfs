@@ -4,7 +4,7 @@ import eventManager from './eventmanager';
 var sfs;
 
 var game_properties = {
-    room_group_name : 'headball', //sfs group name
+    room_group_name : 'bolamania', //sfs group name
     players : 2 //player needed
 }
 
@@ -41,6 +41,7 @@ export default class SFSClient {
 
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
+        eventManager.on('find-match', this.findMatch, this);
     }
 
     getProperties() 
@@ -85,7 +86,7 @@ export default class SFSClient {
             game_properties.nickname = sessionStorage.getItem("dewa.username");
             game_properties.tournamentId = parseInt(sessionStorage.getItem("dewa.roomid"));
             
-            game_properties.isBotAllowed = 1;
+            game_properties.isBotAllowed = 0;
         }
         
         if (sfs.isConnected)
@@ -101,6 +102,42 @@ export default class SFSClient {
     login()
     {
         sfs.send(new SFS2X.LoginRequest(game_properties.user_id));
+    }
+
+    createMatch()
+    {
+        let timeStamp = Date.now().toString();
+        let roomName = "HB" + timeStamp;
+        
+        let settings = new SFS2X.SFSGameSettings(roomName);
+        settings.maxUsers = game_properties.players;
+        settings.groupId = game_properties.room_group_name;
+        settings.isPublic = true;
+        settings.minPlayersToStartGame = game_properties.players;
+        settings.notifyGameStarted = true;
+        settings.extension = new SFS2X.RoomExtension("JavaScript", "bolamania.js");
+        
+        let roomId = new SFS2X.SFSRoomVariable("roomid", game_properties.tournamentId);
+        let isBotAllowed = new SFS2X.SFSRoomVariable("isBotAllowed", game_properties.isBotAllowed);
+        
+        settings.variables = [roomId, isBotAllowed];
+
+        sfs.send(new SFS2X.CreateSFSGameRequest(settings));
+        
+    }
+
+    findMatch()
+    {
+        console.log('finding match');
+        let existedRoomCount = sfs.roomManager.getRoomListFromGroup(game_properties.room_group_name).length;
+        if (existedRoomCount > 0)
+        {
+            let matchExpr = new SFS2X.MatchExpression("isStarted", SFS2X.BoolMatch.EQUALS, false)
+                .and("roomid", SFS2X.NumberMatch.EQUALS, game_properties.tournamentId);
+            sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [game_properties.room_group_name], sfs.lastJoinedRoom));	
+        } else {
+            this.createMatch();
+        }
     }
 }
 
