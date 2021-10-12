@@ -1,12 +1,13 @@
 import * as SFS2X from 'sfs2x-api'
 import eventManager from './eventmanager';
+import GameManager from './gamemanager';
 
 var sfs;
 
 var game_properties = {
     room_group_name : 'gameroomdev', //sfs group name
     players : 2 //player needed
-}
+};
 
 var sfs_config = {
     host: '127.0.0.1',
@@ -14,7 +15,7 @@ var sfs_config = {
     zone: 'BasicExamples',
     debug: false,
     useSSl: false
-}
+};
 
 export default class SFSClient {
     constructor()
@@ -222,9 +223,17 @@ function onRoomCreationError(event)
 function onExtensionResponse(event)
 {
     console.log(event);
+    
     switch (event.cmd) {
         case 'trace':
             console.log(event.params.getUtfString('msg'));
+            break;
+        case 'ready_msg':
+            console.log(event.params.getUtfString('value'));
+            break;
+        case 'ready':
+            let player_keys = event.params.getKeysArray();
+            GameManager.initPlayers();
             break;
     }
 }
