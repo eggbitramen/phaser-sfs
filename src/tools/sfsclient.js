@@ -107,7 +107,7 @@ export default class SFSClient {
     createMatch()
     {
         let timeStamp = Date.now().toString();
-        let roomName = "HB" + timeStamp;
+        let roomName = "BM" + timeStamp;
         
         let settings = new SFS2X.SFSGameSettings(roomName);
         settings.maxUsers = game_properties.players;
@@ -115,7 +115,7 @@ export default class SFSClient {
         settings.isPublic = true;
         settings.minPlayersToStartGame = game_properties.players;
         settings.notifyGameStarted = true;
-        settings.extension = new SFS2X.RoomExtension("JavaScript", "headball.js");
+        settings.extension = new SFS2X.RoomExtension("JavaScript", "bolamania.js");
         
         let roomId = new SFS2X.SFSRoomVariable("roomid", game_properties.tournamentId);
         let isBotAllowed = new SFS2X.SFSRoomVariable("isBotAllowed", game_properties.isBotAllowed);
@@ -221,6 +221,7 @@ function onRoomCreationError(event)
 
 function onExtensionResponse(event)
 {
+    console.log(event);
     switch (event.cmd) {
         case 'trace':
             console.log(event.params.getUtfString('msg'));
