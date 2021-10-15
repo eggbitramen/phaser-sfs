@@ -2,14 +2,15 @@ import * as SFS2X from 'sfs2x-api'
 import eventManager from './eventmanager';
 import GameManager from './gamemanager';
 
-var sfs;
+let sfs;
+let gm;
 
-var game_properties = {
+let game_properties = {
     room_group_name : 'gameroomdev', //sfs group name
     players : 2 //player needed
 };
 
-var sfs_config = {
+let sfs_config = {
     host: '127.0.0.1',
     port: 8090,
     zone: 'BasicExamples',
@@ -39,6 +40,8 @@ export default class SFSClient {
         sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN_ERROR, onRoomJoinError, this);
         sfs.addEventListener(SFS2X.SFSEvent.ROOM_JOIN, onRoomJoin, this);
         sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
+
+        gm = GameManager.getInstance();
 
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
@@ -222,18 +225,23 @@ function onRoomCreationError(event)
 
 function onExtensionResponse(event)
 {
-    console.log(event);
-    
     switch (event.cmd) {
         case 'trace':
             console.log(event.params.getUtfString('msg'));
             break;
         case 'ready_msg':
             console.log(event.params.getUtfString('value'));
+            eventManager.emit('ready', event.params.getUtfString('value'));
             break;
         case 'ready':
-            let player_keys = event.params.getKeysArray();
-            GameManager.initPlayers();
+            gm.initPlayers(event.params);
+            eventManager.emit('enter-matchwrapper');
+            break;
+        case 'countdown':
+            eventManager.emit('countdown', event.params.getUtfString('value'));
+            if (event.params.getUtfString('value') == '0') {
+                eventManager.emit('start_game');
+            }
             break;
     }
 }

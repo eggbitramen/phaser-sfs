@@ -1,18 +1,26 @@
-var players = [];
+let instance = null;    // act as singleton
 
-export default class GameManager {      // act as singleton
+let players = [];
+export default class GameManager {
     constructor()
     { }
+
+    static getInstance()
+    {
+        if (instance == null) instance = new GameManager();
+        return instance;
+    }
 
     initPlayers(players_obj)
     {
         players = [];
         let player_keys = players_obj.getKeysArray();
         for (const key in player_keys) {
+            let player_obj = players_obj.getSFSObject(player_keys[key]);
             let player = {
-                name: players_obj[key].getUtfString('name'),
-                nickname: players_obj[key].getUtfString('nickname'),
-                avatar_url: players_obj[key].getUtfString('avatar')
+                name: player_obj.getUtfString('name'),
+                nickname: player_obj.getUtfString('nickname'),
+                avatar_url: player_obj.getUtfString('avatar')
             };
             players.push(player);
         }

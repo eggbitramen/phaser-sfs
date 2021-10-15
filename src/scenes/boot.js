@@ -11,13 +11,34 @@ export default class Boot extends Phaser.Scene {
         this.game.height = height;
 
         this.load.setPath('./assets/images/');
-        this.load.image('lobby-bg', 'lobby-bg.png');
-        this.load.image('button-00', 'button-00.png');
-        this.load.image('button-01', 'button-01.png');
-        this.load.image('sprtxt-start', 'sprtxt-start.png');
-        this.load.image('sprtxt-cancel', 'sprtxt-cancel.png');
-        this.load.image('sprtxt-exit', 'sprtxt-exit.png');
-        this.load.image('sprtxt-rematch', 'sprtxt-rematch.png');
+        this.load.image('lobby-bg', 'wrapper/lobby-bg.png');
+        this.load.image('button-00', 'wrapper/button-00.png');
+        this.load.image('button-01', 'wrapper/button-01.png');
+        this.load.image('sprtxt-start', 'wrapper/sprtxt-start.png');
+        this.load.image('sprtxt-cancel', 'wrapper/sprtxt-cancel.png');
+        this.load.image('sprtxt-exit', 'wrapper/sprtxt-exit.png');
+        this.load.image('sprtxt-rematch', 'wrapper/sprtxt-rematch.png');
+        this.load.image('avatar-none', 'wrapper/avatar-none.png');
+
+        this.load.image('ball_shadow', 'game/ball_shadow.png');
+        this.load.image('bg_night', 'game/bg_night.png');
+        this.load.image('ball', 'game/bola.png');
+        this.load.image('red_head', 'game/charakter_head_red.png');
+        this.load.image('red_shoe', 'game/charakter_red_spatu.png');
+        this.load.image('dirt', 'game/dirt_.png');
+        this.load.image('sprtxt-goal', 'game/goal.png');
+        this.load.image('green_head', 'game/green_head.png');
+        this.load.image('green_shoe', 'game/green_spatu.png');
+        this.load.image('sprtxt-kickoff', 'game/kick_off.png');
+        this.load.image('field', 'game/lapangan_.png');
+        this.load.image('stadium_light', 'game/ligtstadium.png');
+        this.load.image('goal_back', 'game/normal_gawang_belakang.png');
+        this.load.image('goal_front', 'game/normal_gawang_depan.png');
+        this.load.image('supporters', 'game/penonton.png');
+        this.load.image('player_shadow', 'game/player_shadoww.png');
+        this.load.image('sprtxt-ready', 'game/ready.png');
+        this.load.image('ui-scoreboard', 'game/scoreboad_.png');
+        this.load.image('tribune', 'game/tribune_stadium.png');
 
         this.load.once('complete', () => {
             this.goToLogin();
@@ -33,7 +54,8 @@ export default class Boot extends Phaser.Scene {
 
     goToLogin()
     {
-        this.scene.stop('boot');
+        console.log(this.load);
+        this.scene.stop(this);
         this.scene.start('login');
     }
 }

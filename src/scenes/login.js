@@ -20,7 +20,7 @@ export default class Login extends Phaser.Scene {
 
     enterLoby()
     {
-        this.scene.stop('login');
+        this.scene.stop(this);
         this.scene.start('lobby');
     }
 }
