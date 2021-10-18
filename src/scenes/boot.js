@@ -56,6 +56,6 @@ export default class Boot extends Phaser.Scene {
     {
         console.log(this.load);
         this.scene.stop(this);
-        this.scene.start('login');
+        this.scene.start('gameplay');
     }
 }

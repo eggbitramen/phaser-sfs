@@ -20,7 +20,6 @@ export default class MatchWrapper extends Phaser.Scene {
     create()
     {
         this.add.image(0, 0, 'lobby-bg').setScale(2);
-        this.add.image('bg_night', 0, 0);
 
         avatar_container = this.add.container(this.game.width / 2, this.game.height / 2);
 

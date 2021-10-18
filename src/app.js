@@ -11,8 +11,8 @@ import GamePlay from './scenes/game';
 
 var game_config = {
     type: Phaser.AUTO,
-    width: 720,
-    height: 1280,
+    width: 1280,
+    height: 720,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
