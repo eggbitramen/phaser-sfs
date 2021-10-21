@@ -46,6 +46,7 @@ export default class SFSClient {
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
         eventManager.on('find-match', this.findMatch, this);
+        eventManager.on('send_cmd', this.send, this);
     }
 
     getProperties() 
@@ -141,6 +142,25 @@ export default class SFSClient {
             sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [game_properties.room_group_name], sfs.lastJoinedRoom));	
         } else {
             this.createMatch();
+        }
+    }
+
+    send(obj)
+    {
+        let object = new SFS2X.SFSObject();
+
+        for (const key in obj.value) {
+            if (obj.value.hasOwnProperty(key)) {
+                console.log();
+                switch (typeof obj.value[key]) {
+                    case 'string':
+                        object.putUtfString(key, obj.value[key]);
+                        break;
+                    case 'number':
+                        object.putDouble(key, obj.value[key]);
+                        break;
+                }
+            }
         }
     }
 }

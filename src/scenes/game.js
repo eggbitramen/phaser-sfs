@@ -1,6 +1,7 @@
 import GameManager from '../tools/gamemanager';
 import Agent from '../entity/agent';
 import Ball from '../entity/ball';
+import Controller from '../tools/controller';
 
 let gm;
 
@@ -64,6 +65,14 @@ export default class GamePlay extends Phaser.Scene
 
         entity_cont.add([p1, p2, ball]);
 
+        //  init controller
+        this.controller = new Controller(this);
+
         console.log('Begin Game');
+    }
+
+    update()
+    {
+        this.controller.update();
     }
 }
