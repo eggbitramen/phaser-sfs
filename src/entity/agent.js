@@ -15,12 +15,15 @@ export default class Agent extends Phaser.GameObjects.Container
             .setFlipX(mirrored)
             .setScale(0.75);
 
-        let collider = this.scene.add.circle(0, 0, 55, 0x9842f5, 150)
-            .setOrigin(0.5, 0.5);
-
         this.add(shoe);
         this.add(head);
-        this.add(collider);
+
+        this.setSize(110, 110);
+        this.scene.physics.world.enable(this);
+        this.body.setCollideWorldBounds(true);
+        this.body.setCircle(55);
+
+        this.scene.physics.add.collider(this.scene.solidGroup, this);
     }
 
     update()

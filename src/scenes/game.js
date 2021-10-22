@@ -47,7 +47,7 @@ export default class GamePlay extends Phaser.Scene
         //  scoreboard components
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
-        scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6);
+        scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
 
         
 
@@ -56,9 +56,18 @@ export default class GamePlay extends Phaser.Scene
         background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1]]);
         foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont]);
 
+        //  world bounds and colliders
+        let solids = [];
+        solids[0] = this.add.container(field.width / 2, field.y + field.height * 9 / 8).setSize(field.width, field.height);
+        solids[1] = this.add.container(goal_backs[0].width * 1 / 2, goal_backs[0].y - goal_backs[0].height + 20);
+        solids[2] = this.add.container(goal_backs[1].x - goal_backs[1].width * 1.9 / 3, goal_backs[1].y - goal_backs[1].height + 20);
+        this.solidGroup = this.physics.add.staticGroup(solids);
+        solids[1].body.setCircle(40);
+        solids[2].body.setCircle(40);
+
         //  moving actors
-        let p1 = new Agent(this, field.width / 4, field.y + field.height * 4/ 10, false);
-        let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4/ 10, true);
+        let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false);
+        let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true);
 
         //  ball
         let ball = new Ball(this, field.width / 2, field.y + field.height / 2);
