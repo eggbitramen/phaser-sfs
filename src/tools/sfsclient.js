@@ -46,7 +46,7 @@ export default class SFSClient {
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
         eventManager.on('find-match', this.findMatch, this);
-        eventManager.on('send_cmd', this.send, this);
+        eventManager.on('send', this.send, this);
     }
 
     getProperties() 
@@ -145,23 +145,24 @@ export default class SFSClient {
         }
     }
 
-    send(obj)
+    send(cmd)
     {
         let object = new SFS2X.SFSObject();
 
-        for (const key in obj.value) {
-            if (obj.value.hasOwnProperty(key)) {
-                console.log();
-                switch (typeof obj.value[key]) {
+        for (const key in cmd.obj) {
+            if (cmd.obj.hasOwnProperty(key)) {
+                switch (typeof cmd.obj[key]) {
                     case 'string':
-                        object.putUtfString(key, obj.value[key]);
+                        object.putUtfString(key, cmd.obj[key]);
                         break;
                     case 'number':
-                        object.putDouble(key, obj.value[key]);
+                        object.putDouble(key, cmd.obj[key]);
                         break;
                 }
             }
         }
+
+        sfs.send(new SFS2X.ExtensionRequest(cmd.req, object, game_properties.current_room));
     }
 }
 
@@ -226,6 +227,8 @@ function onRoomJoinError(event)
 
 function onRoomJoin(event)
 {
+    game_properties.current_room = event.room;
+
     switch (event.room.name) {
         case "The Lobby":
             eventManager.emit('enter-loby');
@@ -262,6 +265,9 @@ function onExtensionResponse(event)
             if (event.params.getUtfString('value') == '0') {
                 eventManager.emit('start_game');
             }
+            break;
+        case 'act':
+            eventManager.emit('set_act', event.params);
             break;
     }
 }

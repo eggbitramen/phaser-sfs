@@ -31,7 +31,7 @@ export default class GameManager {
         return players;
     }
 
-    getPlayer(name)
+    getPlayerByName(name)
     {
         players.forEach( function(player) {
             if (player.name == name)

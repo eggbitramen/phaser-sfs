@@ -55,6 +55,6 @@ export default class Boot extends Phaser.Scene {
     goToLogin()
     {
         this.scene.stop(this);
-        this.scene.start('gameplay');
+        this.scene.start('login');
     }
 }

@@ -45,17 +45,8 @@ export default class Controller
 
         //  action buttons
         if (Phaser.Input.Keyboard.JustDown(this.key_space)) {
-            this.send('act', {act : 'jump'});
+            send('act', {act : 'jump'});
         }
-    }
-
-    send(key, value) {
-        let cmd = {
-            key: key,
-            value: value
-        };
-
-        eventManager.emit('send', cmd);
     }
 }
 
@@ -63,6 +54,17 @@ function updateKeyStatus(key_status, key_value) {
     if (key_status != key_value) {
         key_status = key_value;
     }
-    console.log(key_status);
+
+    send('act', {dir : key_status});
+    
     return key_status;
+}
+
+function send(req, obj) {
+    let cmd = {
+        req: req,
+        obj: obj
+    };
+
+    eventManager.emit('send', cmd);
 }

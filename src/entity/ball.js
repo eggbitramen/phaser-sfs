@@ -13,4 +13,9 @@ export default class Ball extends Phaser.GameObjects.Sprite
         this.body.setCollideWorldBounds(true);
         this.scene.physics.add.collider(this.scene.solidGroup, this);
     }
+
+    update(time, delta)
+    {
+        
+    }
 }

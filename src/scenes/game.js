@@ -10,6 +10,8 @@ let background_cont;
 let foreground_cont;
 let entity_cont;
 
+let entities = [];
+
 export default class GamePlay extends Phaser.Scene
 {
     constructor()
@@ -66,22 +68,25 @@ export default class GamePlay extends Phaser.Scene
         solids[2].body.setCircle(40);
 
         //  moving actors
-        let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false);
-        let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true);
+        let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
+        let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1]);
 
         //  ball
         let ball = new Ball(this, field.width / 2, field.y + field.height / 2);
+
+        entities = [p1, p2, ball];
 
         entity_cont.add([p1, p2, ball]);
 
         //  init controller
         this.controller = new Controller(this);
-
-        console.log('Begin Game');
     }
 
-    update()
+    update(time, delta)
     {
         this.controller.update();
+        for (const i_entity in entities) {
+            entities[i_entity].update(time, delta);
+        }
     }
 }

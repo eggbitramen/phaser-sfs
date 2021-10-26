@@ -17,7 +17,7 @@ var game_config = {
         default: 'arcade',
         arcade: {
             debug: true,
-            gravity: {y: 2000}
+            gravity: {y:5000}
         }
     },
     scale: {
