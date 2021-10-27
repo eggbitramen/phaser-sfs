@@ -5,11 +5,6 @@ import GameManager from './gamemanager';
 let sfs;
 let gm;
 
-let game_properties = {
-    room_group_name : 'gameroomdev', //sfs group name
-    players : 2 //player needed
-};
-
 let sfs_config = {
     host: '127.0.0.1',
     port: 8090,
@@ -42,6 +37,10 @@ export default class SFSClient {
         sfs.addEventListener(SFS2X.SFSEvent.EXTENSION_RESPONSE, onExtensionResponse, this);
 
         gm = GameManager.getInstance();
+        gm.setProperty({
+            room_group_name: 'gameroomdev',
+            players: 2
+        });
 
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
@@ -68,15 +67,17 @@ export default class SFSClient {
         typeof sessionStorage["dewa.roomid"] !== "undefined"
         )
         {
-            game_properties.user_id = sessionStorage.getItem("dewa.uid");
-            game_properties.session_token = sessionStorage.getItem("dewa.session_token");
-            game_properties.game_id = sessionStorage.getItem("dewa.game_id");
-            game_properties.website_id = sessionStorage.getItem("dewa.website_id");
-            game_properties.nickname = sessionStorage.getItem("dewa.username");
-            game_properties.tournamentId = parseInt(sessionStorage.getItem("dewa.roomid"));
-            game_properties.fee = sessionStorage.getItem("dewa.fee");
-            game_properties.prize = sessionStorage.getItem("dewa.prize");
-            game_properties.isBotAllowed = parseInt(sessionStorage.getItem("dewa.bot"));
+            gm.setProperty({
+                user_id: sessionStorage.getItem("dewa.uid"),
+                session_token: sessionStorage.getItem("dewa.session_token"),
+                game_id: sessionStorage.getItem("dewa.game_id"),
+                website_id: sessionStorage.getItem("dewa.website_id"),
+                nickname: sessionStorage.getItem("dewa.username"),
+                tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
+                fee: sessionStorage.getItem("dewa.fee"),
+                prize: sessionStorage.getItem("dewa.prize"),
+                isBotAllowed: parseInt(sessionStorage.getItem("dewa.bot"))
+            });
         }
         else{
             sessionStorage.setItem("dewa.uid", "UserTest" + Math.floor(Math.random() * 50));
@@ -85,13 +86,14 @@ export default class SFSClient {
             sessionStorage.setItem("dewa.username", sessionStorage.getItem("dewa.uid") + "-nickname");
             sessionStorage.setItem("dewa.roomid", 10);
             
-            game_properties.user_id = sessionStorage.getItem("dewa.uid");
-            game_properties.game_id = sessionStorage.getItem("dewa.game_id");
-            game_properties.website_id = sessionStorage.getItem("dewa.website_id");
-            game_properties.nickname = sessionStorage.getItem("dewa.username");
-            game_properties.tournamentId = parseInt(sessionStorage.getItem("dewa.roomid"));
-            
-            game_properties.isBotAllowed = 0;
+            gm.setProperty({
+                user_id: sessionStorage.getItem("dewa.uid"),
+                game_id: sessionStorage.getItem("dewa.game_id"),
+                website_id: sessionStorage.getItem("dewa.website_id"),
+                nickname: sessionStorage.getItem("dewa.username"),
+                tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
+                isBotAllowed: 0
+            });
         }
         
         if (sfs.isConnected)
@@ -106,7 +108,7 @@ export default class SFSClient {
 
     login()
     {
-        sfs.send(new SFS2X.LoginRequest(game_properties.user_id));
+        sfs.send(new SFS2X.LoginRequest(gm.getProperties().user_id));
     }
 
     createMatch()
@@ -115,15 +117,15 @@ export default class SFSClient {
         let roomName = "BM" + timeStamp;
         
         let settings = new SFS2X.SFSGameSettings(roomName);
-        settings.maxUsers = game_properties.players;
-        settings.groupId = game_properties.room_group_name;
+        settings.maxUsers = gm.getProperties().players;
+        settings.groupId = gm.getProperties().room_group_name;
         settings.isPublic = true;
-        settings.minPlayersToStartGame = game_properties.players;
+        settings.minPlayersToStartGame = gm.getProperties().players;
         settings.notifyGameStarted = true;
         settings.extension = new SFS2X.RoomExtension("JavaScript", "bolamania.js");
         
-        let roomId = new SFS2X.SFSRoomVariable("roomid", game_properties.tournamentId);
-        let isBotAllowed = new SFS2X.SFSRoomVariable("isBotAllowed", game_properties.isBotAllowed);
+        let roomId = new SFS2X.SFSRoomVariable("roomid", gm.getProperties().tournamentId);
+        let isBotAllowed = new SFS2X.SFSRoomVariable("isBotAllowed", gm.getProperties().isBotAllowed);
         
         settings.variables = [roomId, isBotAllowed];
 
@@ -134,12 +136,12 @@ export default class SFSClient {
     findMatch()
     {
         console.log('finding match');
-        let existedRoomCount = sfs.roomManager.getRoomListFromGroup(game_properties.room_group_name).length;
+        let existedRoomCount = sfs.roomManager.getRoomListFromGroup(gm.getProperties().room_group_name).length;
         if (existedRoomCount > 0)
         {
             let matchExpr = new SFS2X.MatchExpression("isStarted", SFS2X.BoolMatch.EQUALS, false)
-                .and("roomid", SFS2X.NumberMatch.EQUALS, game_properties.tournamentId);
-            sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [game_properties.room_group_name], sfs.lastJoinedRoom));	
+                .and("roomid", SFS2X.NumberMatch.EQUALS, gm.getProperties().tournamentId);
+            sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [gm.getProperties().room_group_name], sfs.lastJoinedRoom));	
         } else {
             this.createMatch();
         }
@@ -162,7 +164,7 @@ export default class SFSClient {
             }
         }
 
-        sfs.send(new SFS2X.ExtensionRequest(cmd.req, object, game_properties.current_room));
+        sfs.send(new SFS2X.ExtensionRequest(cmd.req, object, gm.getProperties().current_room));
     }
 }
 
@@ -191,7 +193,7 @@ function onErrorLogged(event)
 function onConnection(event)
 {
     console.log("Connected");
-    sfs.send(new SFS2X.LoginRequest(game_properties.user_id));
+    sfs.send(new SFS2X.LoginRequest(gm.getProperties().user_id));
 }
 
 function onConnectionLost(event)
@@ -207,9 +209,9 @@ function onLoginError(event)
 
 function onLogin(event)
 {
-    let websiteId = new SFS2X.SFSUserVariable("website_id", game_properties.website_id);
-	let nickname = new SFS2X.SFSUserVariable("nickname", game_properties.nickname);
-	let sessionToken = new SFS2X.SFSUserVariable("session_token", game_properties.session_token);
+    let websiteId = new SFS2X.SFSUserVariable("website_id", gm.getProperties().website_id);
+	let nickname = new SFS2X.SFSUserVariable("nickname", gm.getProperties().nickname);
+	let sessionToken = new SFS2X.SFSUserVariable("session_token", gm.getProperties().session_token);
 	
 	sfs.send(new SFS2X.SetUserVariablesRequest([websiteId, nickname, sessionToken]));
     sfs.send(new SFS2X.JoinRoomRequest("The Lobby"));
@@ -227,7 +229,7 @@ function onRoomJoinError(event)
 
 function onRoomJoin(event)
 {
-    game_properties.current_room = event.room;
+    gm.setProperty({current_room: event.room});
 
     switch (event.room.name) {
         case "The Lobby":

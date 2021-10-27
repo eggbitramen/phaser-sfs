@@ -38,9 +38,11 @@ export default class Agent extends Phaser.GameObjects.Container
 
         //  events
         eventManager.on('set_act', this.setAction, this);
+        eventManager.on('dispatch_controller', send, this);
 
         this.scene.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('set_act', this.setAction, this);
+            eventManager.off('dispatch_controller', send, this);
         });
     }
 
@@ -58,6 +60,9 @@ export default class Agent extends Phaser.GameObjects.Container
     {
         if (params.getUtfString('name') == this.name)
         {
+            this.x = params.getDouble('x');
+            this.y = params.getDouble('y');
+
             this.dir = params.getUtfString('dir') ? params.getUtfString('dir') : this.dir;
             this.act = params.getUtfString('act') ? params.getUtfString('act') : this.act;
         }
@@ -87,5 +92,16 @@ export default class Agent extends Phaser.GameObjects.Container
                 break;
         }
         this.act = "";
+    }
+}
+
+function send(cmd) {
+    if (cmd.sender == this.name) {
+        cmd.obj.x = this.x;
+        cmd.obj.y = this.y;
+
+        delete cmd.sender;
+
+        eventManager.emit('send', cmd);
     }
 }

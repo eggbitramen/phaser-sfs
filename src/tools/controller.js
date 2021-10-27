@@ -1,10 +1,16 @@
+import GameManager from '../tools/gamemanager';
 import eventManager from '../tools/eventmanager';
+
+let gm;
 
 export default class Controller
 {
     constructor(scene)
     {
+
         this.scene = scene;
+
+        gm = GameManager.getInstance();
 
         this.key_status = 'idle';
         
@@ -63,8 +69,9 @@ function updateKeyStatus(key_status, key_value) {
 function send(req, obj) {
     let cmd = {
         req: req,
+        sender: gm.getProperty('user_id'), 
         obj: obj
     };
 
-    eventManager.emit('send', cmd);
+    eventManager.emit('dispatch_controller', cmd);
 }

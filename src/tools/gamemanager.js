@@ -1,6 +1,8 @@
 let instance = null;    // act as singleton
 
 let players = [];
+let properties = {};
+
 export default class GameManager {
     constructor()
     { }
@@ -43,5 +45,20 @@ export default class GameManager {
     clearAllPlayers()
     {
         players = [];
+    }
+
+    setProperty(elements)
+    {
+        properties = Object.assign(properties, elements);
+    }
+
+    getProperty(name)
+    {
+        return properties[name];
+    }
+
+    getProperties()
+    {
+        return properties;
     }
 }
