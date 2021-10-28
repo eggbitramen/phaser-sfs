@@ -2,6 +2,7 @@ import GameManager from '../tools/gamemanager';
 import Agent from '../entity/agent';
 import Ball from '../entity/ball';
 import Controller from '../tools/controller';
+import eventManager from '../tools/eventmanager';
 
 let gm;
 
@@ -30,6 +31,15 @@ export default class GamePlay extends Phaser.Scene
         entity_cont = this.add.container(0, 0);
         foreground_cont = this.add.container(0, 0);
 
+        this.overlap_list = this.physics.add.group();
+        
+        //events
+        eventManager.on('register_overlap', registerOverlap, this);
+
+        this.events.once(Phaser.Scenes.SHUTDOWN, () => {
+            eventManager.iff('register_overlap', registerOverlap, this);
+        });
+
         //  static images, backgrounds
         let bg_night = this.add.image(0, 0, 'bg_night').setOrigin(0, 0);
         let tribune = this.add.image(0, 0, 'tribune').setOrigin(0, 0);
@@ -50,8 +60,6 @@ export default class GamePlay extends Phaser.Scene
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
         scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
-
-        
 
         scoreboard_cont.add(scoreboard);
 
@@ -89,4 +97,9 @@ export default class GamePlay extends Phaser.Scene
             entities[i_entity].update(time, delta);
         }
     }
+}
+
+function registerOverlap(object) {
+    this.overlap_list.add(object);
+    this.physics.add.overlap(object, this.overlap_list);
 }

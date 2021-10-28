@@ -3,6 +3,8 @@ import eventManager from '../tools/eventmanager';
 const SPEED = 40;
 const JUMP_STR = 100;
 
+let overlaps = [];
+
 export default class Agent extends Phaser.GameObjects.Container
 {
     constructor(scene, x, y, mirrored, player)
@@ -29,6 +31,8 @@ export default class Agent extends Phaser.GameObjects.Container
         this.body.setCircle(55);
 
         this.scene.physics.add.collider(this.scene.solidGroup, this);
+        eventManager.emit('register_overlap', this);
+        //this.scene.physics.add.overlap(this, this.scene.overlap_list, overlap, null, this);
 
         this.name = player.name;
         this.nickname = player.nickname;
@@ -92,7 +96,26 @@ export default class Agent extends Phaser.GameObjects.Container
                 break;
         }
         this.act = "";
+
+        // this.scene.overlap_list.getChildren.forEach( function (object) {
+        //     if (this.scene.physics.overlap(this, object))
+        //     console.log(object);
+        // });
+        console.log(this.scene.physics.overlap(this, this.scene.overlap_list));
+        this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new overlaps
+        
     }
+}
+
+function overlap(self, other) {
+    if (!overlaps.includes(other.name)) {   // on overlap start
+        overlaps.push(other.name);
+        console.log(other.name);
+    }
+}
+
+function checkRemoveOverlap(params) {
+    
 }
 
 function send(cmd) {
