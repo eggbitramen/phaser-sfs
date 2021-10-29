@@ -164,6 +164,8 @@ export default class SFSClient {
             }
         }
 
+        console.log(object);
+
         sfs.send(new SFS2X.ExtensionRequest(cmd.req, object, gm.getProperties().current_room));
     }
 }
@@ -270,6 +272,9 @@ function onExtensionResponse(event)
             break;
         case 'act':
             eventManager.emit('set_act', event.params);
+            break;
+        case 'ball':
+            eventManager.emit('set_ball', event.params);
             break;
     }
 }

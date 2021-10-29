@@ -3,8 +3,6 @@ import eventManager from '../tools/eventmanager';
 const SPEED = 40;
 const JUMP_STR = 100;
 
-let overlaps = [];
-
 export default class Agent extends Phaser.GameObjects.Container
 {
     constructor(scene, x, y, mirrored, player)
@@ -39,6 +37,8 @@ export default class Agent extends Phaser.GameObjects.Container
 
         this.dir = "";
         this.act = "";
+
+        this.overlaps = [];
 
         //  events
         eventManager.on('set_act', this.setAction, this);
@@ -97,25 +97,33 @@ export default class Agent extends Phaser.GameObjects.Container
         }
         this.act = "";
 
-        // this.scene.overlap_list.getChildren.forEach( function (object) {
-        //     if (this.scene.physics.overlap(this, object))
-        //     console.log(object);
-        // });
-        console.log(this.scene.physics.overlap(this, this.scene.overlap_list));
-        this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new overlaps
+        let overlap_list = this.scene.overlap_list.getChildren();
+        for (const i in overlap_list) {
+            if (overlap_list[i] != this) {
+                if (this.scene.physics.overlap(this, overlap_list[i]) == false) {
+                    let ioverlap = this.overlaps.indexOf(overlap_list[i].name);
+                    if (ioverlap != -1) {
+                        /*
+                        ... code for overlap exit
+                        */
+                        this.overlaps.splice(ioverlap, 1);   //  on overlap end
+                    }
+                }
+            }
+        }
+
+        this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new this.overlaps
         
     }
 }
 
 function overlap(self, other) {
-    if (!overlaps.includes(other.name)) {   // on overlap start
-        overlaps.push(other.name);
-        console.log(other.name);
+    if (!self.overlaps.includes(other.name)) {   // on overlap start
+        self.overlaps.push(other.name);
+        /*
+        ... code for overlap enter
+        */
     }
-}
-
-function checkRemoveOverlap(params) {
-    
 }
 
 function send(cmd) {
