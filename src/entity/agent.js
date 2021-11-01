@@ -25,7 +25,6 @@ export default class Agent extends Phaser.GameObjects.Container
 
         this.setSize(110, 110);
         this.scene.physics.world.enable(this);
-        this.body.setCollideWorldBounds(true);
         this.body.setCircle(55);
 
         this.scene.physics.add.collider(this.scene.solidGroup, this);
