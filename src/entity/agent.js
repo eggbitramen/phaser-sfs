@@ -2,6 +2,7 @@ import eventManager from '../tools/eventmanager';
 
 const SPEED = 40;
 const JUMP_STR = 100;
+const MASS_GRAVITY = 5000;
 
 export default class Agent extends Phaser.GameObjects.Container
 {
@@ -26,6 +27,7 @@ export default class Agent extends Phaser.GameObjects.Container
         this.setSize(110, 110);
         this.scene.physics.world.enable(this);
         this.body.setCircle(55);
+        this.body.setGravityY(MASS_GRAVITY);
 
         this.scene.physics.add.collider(this.scene.solidGroup, this);
         eventManager.emit('register_overlap', this);
@@ -122,6 +124,9 @@ function overlap(self, other) {
         /*
         ... code for overlap enter
         */
+       if (other.name == 'ball') {
+           other.interact(self);
+       }
     }
 }
 
