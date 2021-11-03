@@ -27,11 +27,12 @@ export default class Agent extends Phaser.GameObjects.Container
         this.setSize(110, 110);
         this.scene.physics.world.enable(this);
         this.body.setCircle(55);
-        this.body.setGravityY(MASS_GRAVITY);
 
         this.scene.physics.add.collider(this.scene.solidGroup, this);
         eventManager.emit('register_overlap', this);
         //this.scene.physics.add.overlap(this, this.scene.overlap_list, overlap, null, this);
+
+        this.body.setGravityY(MASS_GRAVITY);
 
         this.name = player.name;
         this.nickname = player.nickname;

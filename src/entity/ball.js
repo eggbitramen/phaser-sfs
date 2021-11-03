@@ -14,13 +14,13 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.scene.physics.world.enable(this);
         this.body.setCircle(this.width / 2);
-        this.body.setGravityY(MASS_GRAVITY);
+        this.scene.physics.add.collider(this, this.scene.solidGroup, checkCollide, null, this);
 
         eventManager.emit('register_overlap', this);
 
         this.overlaps = [];
         
-        send('ball', {x: this.x, y: this.y, velocity_x: 2000, velocity_y: -2000});
+        send('ball', {x: this.x, y: this.y, velocity_x: 5000, velocity_y: -5000});
 
         //events
         eventManager.on('set_ball', this.setBall, this);
@@ -28,38 +28,34 @@ export default class Ball extends Phaser.GameObjects.Sprite
         this.scene.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('set_ball', this.setBall, this);
         });
+
+        this.body.setGravityY(MASS_GRAVITY);
     }
 
     update(time, delta)
     {
+        //console.log(this.body.gravity);
+
         let solid_list = this.scene.solidGroup.getChildren();
         for (const i in solid_list) {
-            if (solid_list[i] != this) {
-                if (this.scene.physics.overlap(this, solid_list[i]) == false) {
-                    let isolid = this.overlaps.indexOf(solid_list[i].name);
-                    if (isolid != -1) {
-                        /*
-                        ... code for overlap exit
-                        */
-
-                        console.log(this.overlaps);
-
-                        this.overlaps.splice(isolid, 1);   //  on overlap end
-                    }
+            if (!this.scene.physics.collide(this, solid_list[i]))
+            {
+                let isolid = this.overlaps.indexOf(solid_list[i].name);
+                if (isolid != -1) 
+                {
+                    this.overlaps.splice(isolid, 1);
+                    console.log(this.overlaps);
                 }
             }
         }
-
-        this.scene.physics.add.overlap(this, this.scene.solidGroup, checkCollide, null, this);
     }
 
     interact(sender_obj)
     {
-        let angle = Phaser.Math.Angle.Between(this.x, this.y, sender_obj.x, sender_obj.y);
+        let bounce_result = bounceCircle(this, sender_obj);
+        console.log(bounce_result);
 
-        console.log(Phaser.Math.Angle.WrapDegrees(angle));
-        
-        //send('ball', {x: this.x, y: this.y, dir_x: 2000, velocity_y: -2000});
+        send('ball', {x: this.x, y: this.y, dir_x: bounce_result.x_dir, dir_y: bounce_result.y_dir});
     }
 
     setBall(params) {
@@ -78,25 +74,27 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
 }
 
+function testo(self, other) {
+    console.log(other.name);
+}
+
 function checkCollide(self, other) {
     if (!self.overlaps.includes(other.name)) {   // on overlap start
         self.overlaps.push(other.name);
-        /*
-        ... code for overlap enter
-        */
-       console.log(self.overlaps);
+        console.log(self.overlaps);
         
         //   bounce
-        bounce(self, other.name);
+        bounce(self, other);
     }
 }
 
-function bounce(self, static_name) {
+function bounce(self, static_body) {
 
     let x_dir = Math.sign(self.body.velocity.x);
     let y_dir = Math.sign(self.body.velocity.y);
+    let bounce_result = null;
 
-    switch (static_name) {
+    switch (static_body.name) {
         case 'rect_down':
             y_dir = -1;
             break;
@@ -113,16 +111,41 @@ function bounce(self, static_name) {
             y_dir = -1;
             break;
         case 'circ_left':
-            // y_dir = -y_dir;
-            // x_dir = -x_dir;
+            bounce_result = bounceCircle(self, static_body);
+            x_dir = bounce_result.x_dir;
+            y_dir = bounce_result.y_dir;
             break;
         case 'circ_right':
-            // y_dir = -y_dir;
-            // x_dir = -x_dir;
+            bounce_result = bounceCircle(self, static_body);
+            x_dir = bounce_result.x_dir;
+            y_dir = bounce_result.y_dir;
             break;
     }
 
     send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir});
+}
+
+function bounceCircle(self, other) {
+
+    let angle = Phaser.Math.Angle.Between(other.x, other.y, self.x, self.y) * (180 / Math.PI);
+        
+    let x_dir = Math.sign(self.body.velocity.x);
+    let y_dir = Math.sign(self.body.velocity.y);
+
+    if (-45 < angle && angle <= 45) {
+        x_dir = 1;
+    }
+    else if (45 < angle && angle <= 135) {
+        y_dir = 1;
+    }
+    else if(-135 < angle && angle <= -45) {
+        y_dir = 1;
+    }
+    else {
+        x_dir = -1;
+    }
+
+    return {x_dir: x_dir, y_dir: y_dir};
 }
 
 function send(req, obj) {

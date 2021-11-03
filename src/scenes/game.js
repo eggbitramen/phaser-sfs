@@ -70,20 +70,14 @@ export default class GamePlay extends Phaser.Scene
         let solids = [];
         solids[0] = this.add.container(field.width / 2, field.y + field.height * 9 / 8).setSize(field.width, field.height);
         solids[0].name = 'rect_down';
-        solids[1] = this.add.container(goal_backs[0].width * 1 / 2, goal_backs[0].y - goal_backs[0].height + 20);
-        solids[1].name = 'circ_left';
-        solids[2] = this.add.container(goal_backs[1].x - goal_backs[1].width * 1.9 / 3, goal_backs[1].y - goal_backs[1].height + 20);
-        solids[2].name = 'circ_right';
-        solids[3] = this.add.container(field.width / 2, -50).setSize(field.width, 100);
-        solids[3].name = 'rect_up';
-        solids[4] = this.add.container(-50, this.game.height / 2).setSize(100, this.game.height);
-        solids[4].name = 'rect_left';
-        solids[5] = this.add.container(field.width + 50, this.game.height / 2).setSize(100, this.game.height);
-        solids[5].name = 'rect_right';
+        solids[1] = this.add.container(field.width / 2, -50).setSize(field.width, 100);
+        solids[1].name = 'rect_up';
+        solids[2] = this.add.container(-50, this.game.height / 2).setSize(100, this.game.height);
+        solids[2].name = 'rect_left';
+        solids[3] = this.add.container(field.width + 50, this.game.height / 2).setSize(100, this.game.height);
+        solids[3].name = 'rect_right';
         
         this.solidGroup = this.physics.add.staticGroup(solids);
-        solids[1].body.setCircle(40);
-        solids[2].body.setCircle(40);
 
         //  moving actors
         let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
