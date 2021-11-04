@@ -1,4 +1,5 @@
 import eventManager from '../tools/eventmanager';
+import GameManager from '../tools/gamemanager';
 
 const SPEED = 40;
 const JUMP_STR = 100;
@@ -9,6 +10,8 @@ export default class Agent extends Phaser.GameObjects.Container
     constructor(scene, x, y, mirrored, player)
     {
         super(scene, x, y)
+
+        this.gm = GameManager.getInstance();
 
         let color = mirrored ? 'red' : 'green';
         let offset = mirrored ? 1 : -1;
@@ -39,6 +42,8 @@ export default class Agent extends Phaser.GameObjects.Container
 
         this.dir = "";
         this.act = "";
+
+        this.kick_dir = 0;
 
         this.overlaps = [];
 
@@ -96,6 +101,12 @@ export default class Agent extends Phaser.GameObjects.Container
             case 'jump':
                 this.body.velocity.y = -JUMP_STR * delta;
                 break;
+            case 'hi':
+                if (this.name == this.gm.getProperty('user_id')) spread(this);
+                break;
+            case 'lo':
+                if (this.name == this.gm.getProperty('user_id')) spread(this);
+                break;
         }
         this.act = "";
 
@@ -105,9 +116,7 @@ export default class Agent extends Phaser.GameObjects.Container
                 if (this.scene.physics.overlap(this, overlap_list[i]) == false) {
                     let ioverlap = this.overlaps.indexOf(overlap_list[i].name);
                     if (ioverlap != -1) {
-                        /*
-                        ... code for overlap exit
-                        */
+                        
                         this.overlaps.splice(ioverlap, 1);   //  on overlap end
                     }
                 }
@@ -119,12 +128,14 @@ export default class Agent extends Phaser.GameObjects.Container
     }
 }
 
+function spread(self) {
+    eventManager.emit('spread', self);
+}
+
 function overlap(self, other) {
     if (!self.overlaps.includes(other.name)) {   // on overlap start
         self.overlaps.push(other.name);
-        /*
-        ... code for overlap enter
-        */
+        
        if (other.name == 'ball') {
            other.interact(self);
        }

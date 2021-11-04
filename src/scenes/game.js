@@ -81,7 +81,9 @@ export default class GamePlay extends Phaser.Scene
 
         //  moving actors
         let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
+        p1.kick_dir = 1;
         let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1]);
+        p2.kick_dir = -1;
 
         //  ball
         let ball = new Ball(this, field.width / 2, field.y + field.height / 2);

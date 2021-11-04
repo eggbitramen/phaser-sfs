@@ -2,6 +2,8 @@ import eventManager from '../tools/eventmanager';
 
 const MASS_GRAVITY = 5000;
 
+let delta;
+
 export default class Ball extends Phaser.GameObjects.Sprite
 {
     constructor(scene, x, y)
@@ -20,21 +22,25 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.overlaps = [];
         
-        send('ball', {x: this.x, y: this.y, velocity_x: 5000, velocity_y: -5000});
+        send('ball', {x: this.x, y: this.y, velocity_x: 0, velocity_y: -1000});
 
         //events
         eventManager.on('set_ball', this.setBall, this);
+        eventManager.on('spread', this.receiveSpread, this);
 
         this.scene.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('set_ball', this.setBall, this);
+            eventManager.off('spread', this.receiveSpread, this);
         });
 
         this.body.setGravityY(MASS_GRAVITY);
     }
 
-    update(time, delta)
+    update(time, _delta)
     {
-        //console.log(this.body.gravity);
+        delta = _delta;
+
+        this.rotation += 0.00001 * this.body.velocity.x * _delta;
 
         let solid_list = this.scene.solidGroup.getChildren();
         for (const i in solid_list) {
@@ -44,18 +50,46 @@ export default class Ball extends Phaser.GameObjects.Sprite
                 if (isolid != -1) 
                 {
                     this.overlaps.splice(isolid, 1);
-                    console.log(this.overlaps);
                 }
             }
         }
     }
 
-    interact(sender_obj)
+    receiveSpread(sender)
     {
-        let bounce_result = bounceCircle(this, sender_obj);
-        console.log(bounce_result);
+        let distance = Math.abs( Phaser.Math.Distance.Between(this.x, this.y, sender.x, sender.y) );
+        if (distance < 90 + this.width / 2) {
+            console.log(sender.act);
 
-        send('ball', {x: this.x, y: this.y, dir_x: bounce_result.x_dir, dir_y: bounce_result.y_dir});
+            let x_vel = 0;
+            let y_vel = 0;
+
+            switch (sender.act) {
+                case 'lo':
+                    x_vel = 150 * sender.kick_dir;
+                    y_vel = -1000;
+                    break;
+            
+                case 'hi':
+                    x_vel = 100 * sender.kick_dir;
+                    y_vel = -1700;
+                    break;
+            }
+
+            send('ball', {x: this.x, y: this.y, velocity_x: x_vel, velocity_y: y_vel});
+        }
+    }
+
+    interact(sender)
+    {
+        let bounce_result = bounceCircle(this, sender);
+        
+        if (this.body.velocity.y == 0) {
+            send('ball', {x: this.x, y: this.y, velocity_x: 50 * bounce_result.x_dir, velocity_y: -350});
+        } else {
+            send('ball', {x: this.x, y: this.y, dir_x: bounce_result.x_dir, dir_y: bounce_result.y_dir});
+        }
+        
     }
 
     setBall(params) {
@@ -68,20 +102,18 @@ export default class Ball extends Phaser.GameObjects.Sprite
             this.body.setGravityY(MASS_GRAVITY);
         }
 
+        console.log(params.getDouble('velocity_x') * delta);
+        console.log(params.getDouble('velocity_y') * delta);
+
         this.setPosition(params.getDouble('x'), params.getDouble('y'));
-        this.body.setVelocity(params.getDouble('velocity_x'), params.getDouble('velocity_y'));
+        this.body.setVelocity(params.getDouble('velocity_x') * delta, params.getDouble('velocity_y')) * delta;
     }
 
-}
-
-function testo(self, other) {
-    console.log(other.name);
 }
 
 function checkCollide(self, other) {
     if (!self.overlaps.includes(other.name)) {   // on overlap start
         self.overlaps.push(other.name);
-        console.log(self.overlaps);
         
         //   bounce
         bounce(self, other);

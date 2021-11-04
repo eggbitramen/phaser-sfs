@@ -53,6 +53,14 @@ export default class Controller
         if (Phaser.Input.Keyboard.JustDown(this.key_space)) {
             send('act', {act : 'jump'});
         }
+
+        if (Phaser.Input.Keyboard.JustDown(this.key_z)) {
+            send('act', {act : 'hi'});
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.key_x)) {
+            send('act', {act : 'lo'});
+        }
     }
 }
 
