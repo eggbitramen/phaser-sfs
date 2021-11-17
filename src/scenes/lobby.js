@@ -46,7 +46,7 @@ export default class Lobby extends Phaser.Scene {
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
         
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
-            this.find_match_btn.off('pointerdown', () => {
+            this.find_match_btn.off('pointerup', () => {
                 this.toggleLobbyState();
             });
             eventManager.off('ready', this.showReadyMember, this);

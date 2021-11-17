@@ -1,6 +1,7 @@
 import GameManager from '../tools/gamemanager';
 import Agent from '../entity/agent';
 import Ball from '../entity/ball';
+import Button from '../entity/button';
 import Controller from '../tools/controller';
 import eventManager from '../tools/eventmanager';
 
@@ -60,11 +61,19 @@ export default class GamePlay extends Phaser.Scene
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
         scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
-
         scoreboard_cont.add(scoreboard);
 
+        //  buttons
+        let anch_y = dirt.y + dirt.height / 4;
+        let anch_x_offset = dirt.width / 20;
+        let bt_left = new Button(this, anch_x_offset * 3, anch_y, 'btn_left', 'btn_left');
+        let bt_right = new Button(this, anch_x_offset * 6, anch_y, 'btn_right', 'btn_right');
+        let bt_jump = new Button(this, anch_x_offset * 10.5, anch_y, 'btn_jump', 'btn_jump');
+        let bt_lo = new Button(this, anch_x_offset * 14, anch_y, 'btn_lo', 'btn_lo');
+        let bt_hi = new Button(this, anch_x_offset * 17.5, anch_y, 'btn_hi', 'btn_hi');
+
         background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1]]);
-        foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont]);
+        foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont, bt_left, bt_right, bt_jump, bt_lo, bt_hi]);
 
         //  world bounds and colliders
         let solids = [];
