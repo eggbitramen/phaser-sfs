@@ -143,6 +143,7 @@ function overlap(self, other) {
 }
 
 function send(cmd) {
+
     if (cmd.sender == this.name) {
         cmd.obj.x = this.x;
         cmd.obj.y = this.y;
