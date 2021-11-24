@@ -60,8 +60,20 @@ export default class GamePlay extends Phaser.Scene
         //  scoreboard components
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
+        let avatars = [];
+        avatars[0] = this.add.image(-scoreboard.width / 2 * 3.8 / 5, -17, 'avatar-none').setScale(0.5);
+        avatars[1] = this.add.image(scoreboard.width / 2 * 3.8 / 5, -17, 'avatar-none').setScale(0.5);
+        let scores = [];
+        scores[0] = this.add.text(-scoreboard.width / 2 * 1.7 / 5, 10, '0').setFontSize(70).setOrigin(0.5, 0.5);
+        scores[1] = this.add.text(scoreboard.width / 2 * 1.7 / 5, 10, '0').setFontSize(70).setOrigin(0.5, 0.5);
+        let names = [];
+        names[0] = this.add.text(-scoreboard.width / 2 * 1.7 / 5, -60, '0').setFontSize(23).setOrigin(0.5, 0.5);
+        names[1] = this.add.text(scoreboard.width / 2 * 1.7 / 5, -60, '0').setFontSize(23).setOrigin(0.5, 0.5);
         scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
         scoreboard_cont.add(scoreboard);
+        scoreboard_cont.add(avatars);
+        scoreboard_cont.add(scores);
+        scoreboard_cont.add(names);
 
         //  buttons
         let anch_y = dirt.y + dirt.height / 4;
