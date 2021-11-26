@@ -39,8 +39,6 @@ export default class Button extends Phaser.GameObjects.Container
 function preSend(cmd) {
     
     let obj = {};
-
-    console.log(cmd);
     
     switch (cmd) {
         case 'left':

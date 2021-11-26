@@ -38,7 +38,7 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('register_overlap', registerOverlap, this);
 
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
-            eventManager.iff('register_overlap', registerOverlap, this);
+            eventManager.off('register_overlap', registerOverlap, this);
         });
 
         //  static images, backgrounds
@@ -56,6 +56,19 @@ export default class GamePlay extends Phaser.Scene
         let goal_fronts = [];
         goal_fronts[0] = this.add.image(0, field.y + field.height * 7 / 10, 'goal_front').setOrigin(0, 1);
         goal_fronts[1] = this.add.image(field.width, field.y + field.height * 7 / 10, 'goal_front').setOrigin(1, 1).setFlipX(true);
+
+        let goal_collider = [];
+        goal_collider[0] = this.add.container()
+            .setSize(goal_backs[0].width * 1 / 2, goal_backs[0].height * 2 / 3)
+            .setPosition(goal_backs[0].x + goal_backs[0].width * 1 / 4, goal_backs[0].y - goal_backs[0].height * 1 / 3);
+        goal_collider[0].name = 'goal_left';
+        goal_collider[1] = this.add.container()
+            .setSize(goal_backs[1].width * 1 / 2, goal_backs[1].height * 2 / 3)
+            .setPosition(goal_backs[1].x - goal_backs[1].width * 1 / 4, goal_backs[1].y - goal_backs[1].height * 1 / 3);
+        goal_collider[1].name = 'goal_right';
+
+        eventManager.emit('register_overlap', goal_collider[0]);
+        eventManager.emit('register_overlap', goal_collider[1]);
 
         //  scoreboard components
         let scoreboard_cont = this.add.container();
@@ -84,7 +97,7 @@ export default class GamePlay extends Phaser.Scene
         let bt_lo = new Button(this, anch_x_offset * 14, anch_y, 'btn_lo', 'lo');
         let bt_hi = new Button(this, anch_x_offset * 17.5, anch_y, 'btn_hi', 'hi');
 
-        background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1]]);
+        background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1], goal_collider[0], goal_collider[1]]);
         foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont, bt_left, bt_right, bt_jump, bt_lo, bt_hi]);
 
         //  world bounds and colliders
@@ -99,6 +112,7 @@ export default class GamePlay extends Phaser.Scene
         solids[3].name = 'rect_right';
         
         this.solidGroup = this.physics.add.staticGroup(solids);
+        //this.solidGroup = this.physics.add.staticGroup(goal_collider);
 
         //  moving actors
         let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);

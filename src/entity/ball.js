@@ -17,6 +17,7 @@ export default class Ball extends Phaser.GameObjects.Sprite
         this.scene.physics.world.enable(this);
         this.body.setCircle(this.width / 2);
         this.scene.physics.add.collider(this, this.scene.solidGroup, checkCollide, null, this);
+        this.scene.physics.add.overlap(this, this.scene.overlap_list, checkOverlap, null, this);
 
         eventManager.emit('register_overlap', this);
 
@@ -42,6 +43,20 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.rotation += 0.00001 * this.body.velocity.x * _delta;
 
+        //  clear overlaps
+        let overlap_list = this.scene.overlap_list.getChildren();
+        for (const i in overlap_list) {
+            if (!this.scene.physics.overlap(this, overlap_list[i]))
+            {
+                let ioverlap = this.overlaps.indexOf(overlap_list[i].name);
+                if (ioverlap != -1) 
+                {
+                    this.overlaps.splice(ioverlap, 1);
+                }
+            }
+        }
+
+        //  clear solid_list
         let solid_list = this.scene.solidGroup.getChildren();
         for (const i in solid_list) {
             if (!this.scene.physics.collide(this, solid_list[i]))
@@ -59,8 +74,6 @@ export default class Ball extends Phaser.GameObjects.Sprite
     {
         let distance = Math.abs( Phaser.Math.Distance.Between(this.x, this.y, sender.x, sender.y) );
         if (distance < 90 + this.width / 2) {
-            console.log(sender.act);
-
             let x_vel = 0;
             let y_vel = 0;
 
@@ -102,9 +115,6 @@ export default class Ball extends Phaser.GameObjects.Sprite
             this.body.setGravityY(MASS_GRAVITY);
         }
 
-        console.log(params.getDouble('velocity_x') * delta);
-        console.log(params.getDouble('velocity_y') * delta);
-
         this.setPosition(params.getDouble('x'), params.getDouble('y'));
         this.body.setVelocity(params.getDouble('velocity_x') * delta, params.getDouble('velocity_y')) * delta;
     }
@@ -117,6 +127,27 @@ function checkCollide(self, other) {
         
         //   bounce
         bounce(self, other);
+    }
+}
+
+function checkOverlap(self, other) {
+    if (!self.overlaps.includes(other.name)) {   // on overlap start
+        self.overlaps.push(other.name);
+        
+        //   score
+        score(other);
+    }
+}
+
+function score(goal) {
+    switch (goal.name) {
+        case 'goal_left':
+            console.log("Goal for right!");
+            break;
+
+        case 'goal_right':
+            console.log("Goal for left!");
+            break;
     }
 }
 
