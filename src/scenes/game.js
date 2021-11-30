@@ -62,10 +62,12 @@ export default class GamePlay extends Phaser.Scene
             .setSize(goal_backs[0].width * 1 / 2, goal_backs[0].height * 2 / 3)
             .setPosition(goal_backs[0].x + goal_backs[0].width * 1 / 4, goal_backs[0].y - goal_backs[0].height * 1 / 3);
         goal_collider[0].name = 'goal_left';
+        goal_collider[0].owner = gm.getAllPlayers()[1];
         goal_collider[1] = this.add.container()
             .setSize(goal_backs[1].width * 1 / 2, goal_backs[1].height * 2 / 3)
             .setPosition(goal_backs[1].x - goal_backs[1].width * 1 / 4, goal_backs[1].y - goal_backs[1].height * 1 / 3);
         goal_collider[1].name = 'goal_right';
+        goal_collider[1].owner = gm.getAllPlayers()[0];
 
         eventManager.emit('register_overlap', goal_collider[0]);
         eventManager.emit('register_overlap', goal_collider[1]);

@@ -140,14 +140,9 @@ function checkOverlap(self, other) {
 }
 
 function score(goal) {
-    switch (goal.name) {
-        case 'goal_left':
-            console.log("Goal for right!");
-            break;
-
-        case 'goal_right':
-            console.log("Goal for left!");
-            break;
+    if (goal.owner != null)
+    {
+        send('score_one', { owner: goal.owner } );
     }
 }
 
