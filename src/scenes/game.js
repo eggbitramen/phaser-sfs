@@ -14,6 +14,9 @@ let entity_cont;
 
 let entities = [];
 
+//  root variables
+let scores = [];
+
 export default class GamePlay extends Phaser.Scene
 {
     constructor()
@@ -36,10 +39,14 @@ export default class GamePlay extends Phaser.Scene
         
         //events
         eventManager.on('register_overlap', registerOverlap, this);
+        eventManager.on('rend_score', renderScore, this);
 
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('register_overlap', registerOverlap, this);
+            eventManager.off('rend_score', renderScore, this);
         });
+
+        let players = gm.getAllPlayers();
 
         //  static images, backgrounds
         let bg_night = this.add.image(0, 0, 'bg_night').setOrigin(0, 0);
@@ -62,12 +69,12 @@ export default class GamePlay extends Phaser.Scene
             .setSize(goal_backs[0].width * 1 / 2, goal_backs[0].height * 2 / 3)
             .setPosition(goal_backs[0].x + goal_backs[0].width * 1 / 4, goal_backs[0].y - goal_backs[0].height * 1 / 3);
         goal_collider[0].name = 'goal_left';
-        goal_collider[0].owner = gm.getAllPlayers()[1];
+        goal_collider[0].owner = gm.getAllPlayers()[1].name;
         goal_collider[1] = this.add.container()
             .setSize(goal_backs[1].width * 1 / 2, goal_backs[1].height * 2 / 3)
             .setPosition(goal_backs[1].x - goal_backs[1].width * 1 / 4, goal_backs[1].y - goal_backs[1].height * 1 / 3);
         goal_collider[1].name = 'goal_right';
-        goal_collider[1].owner = gm.getAllPlayers()[0];
+        goal_collider[1].owner = gm.getAllPlayers()[0].name;
 
         eventManager.emit('register_overlap', goal_collider[0]);
         eventManager.emit('register_overlap', goal_collider[1]);
@@ -75,15 +82,25 @@ export default class GamePlay extends Phaser.Scene
         //  scoreboard components
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
+        
         let avatars = [];
-        avatars[0] = this.add.image(-scoreboard.width / 2 * 3.8 / 5, -17, 'avatar-none').setScale(0.5);
-        avatars[1] = this.add.image(scoreboard.width / 2 * 3.8 / 5, -17, 'avatar-none').setScale(0.5);
-        let scores = [];
-        scores[0] = this.add.text(-scoreboard.width / 2 * 1.7 / 5, 10, '0').setFontSize(70).setOrigin(0.5, 0.5);
-        scores[1] = this.add.text(scoreboard.width / 2 * 1.7 / 5, 10, '0').setFontSize(70).setOrigin(0.5, 0.5);
         let names = [];
-        names[0] = this.add.text(-scoreboard.width / 2 * 1.7 / 5, -60, '0').setFontSize(23).setOrigin(0.5, 0.5);
-        names[1] = this.add.text(scoreboard.width / 2 * 1.7 / 5, -60, '0').setFontSize(23).setOrigin(0.5, 0.5);
+        for (let iplayer = 0; iplayer < players.length; iplayer++) 
+        {
+            let rend_name = String(players[iplayer].nickname).length <= 8 ? players[iplayer].nickname : String(players[iplayer].nickname).substr(0, 8);
+            let offset = iplayer > 0 ? iplayer : -1;
+            avatars[iplayer] = this.add.image(scoreboard.width * offset / 2 * 3.8 / 5, -17, 'avatar-none')
+                .setScale(0.5);
+            names[iplayer] = this.add.text(scoreboard.width * offset / 2 * 1.7 / 5, -60, '0')
+                .setFontSize(23)
+                .setOrigin(0.5, 0.5)
+                .setText(rend_name);
+            scores[iplayer] = this.add.text(scoreboard.width * offset / 2 * 1.7 / 5, 10, '0')
+                .setFontSize(70)
+                .setOrigin(0.5, 0.5);
+            scores[iplayer].owner = players[iplayer].name;
+        }
+        
         scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
         scoreboard_cont.add(scoreboard);
         scoreboard_cont.add(avatars);
@@ -145,4 +162,14 @@ export default class GamePlay extends Phaser.Scene
 function registerOverlap(object) {
     this.overlap_list.add(object);
     this.physics.add.overlap(object, this.overlap_list);
+}
+
+function renderScore(params) {
+    console.log(params);
+    scores.forEach( function(score_txt) {
+        console.log(score_txt);
+        if (score_txt.owner == params.getUtfString('owner')) {
+            score_txt.setText(String(params.getDouble('new_score')));
+        }
+    });
 }

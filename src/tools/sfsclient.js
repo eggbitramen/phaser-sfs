@@ -274,5 +274,8 @@ function onExtensionResponse(event)
         case 'ball':
             eventManager.emit('set_ball', event.params);
             break;
+        case 'rend_score':
+            eventManager.emit('rend_score', event.params);
+            break;
     }
 }

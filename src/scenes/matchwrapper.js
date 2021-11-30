@@ -33,7 +33,7 @@ export default class MatchWrapper extends Phaser.Scene {
         for (const p in players) {
             let player = players[p];
             let avatar_image = this.add.image(0, 0, 'avatar-none').setOrigin(0.5, 0.5);
-            let avatar_name = this.add.text(0, 0, player.name).setOrigin(0.5, 0.5).setFontSize(35).setFontStyle('bold');
+            let avatar_name = this.add.text(0, 0, player.nickname).setOrigin(0.5, 0.5).setFontSize(35).setFontStyle('bold');
             avatar_image.setPosition(((-players.length / 2) + parseInt(p) * 2) * avatar_image.width, 0);
             avatar_name.setPosition(avatar_image.x, avatar_image.y + 125);
             avatar_container.add(avatar_image);
