@@ -277,5 +277,8 @@ function onExtensionResponse(event)
         case 'rend_score':
             eventManager.emit('rend_score', event.params);
             break;
+        case 'reset':
+            eventManager.emit('reset_layout');
+            break;
     }
 }

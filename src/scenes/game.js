@@ -40,6 +40,7 @@ export default class GamePlay extends Phaser.Scene
         //events
         eventManager.on('register_overlap', registerOverlap, this);
         eventManager.on('rend_score', renderScore, this);
+        eventManager.on('reset_layout', resetLayout, this);
 
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('register_overlap', registerOverlap, this);
@@ -172,4 +173,8 @@ function renderScore(params) {
             score_txt.setText(String(params.getDouble('new_score')));
         }
     });
+}
+
+function resetLayout() {
+    this.scene.restart();
 }
