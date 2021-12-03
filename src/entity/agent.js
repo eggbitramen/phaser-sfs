@@ -11,6 +11,10 @@ export default class Agent extends Phaser.GameObjects.Container
     {
         super(scene, x, y)
 
+        //  init pos
+        this.init_x = this.x;
+        this.init_y = this.y;
+
         this.gm = GameManager.getInstance();
 
         let color = mirrored ? 'red' : 'green';
@@ -49,11 +53,11 @@ export default class Agent extends Phaser.GameObjects.Container
 
         //  events
         eventManager.on('set_act', this.setAction, this);
-        eventManager.on('dispatch_controller', send, this);
+        eventManager.on('dispatch_controller', getSend, this);
 
         this.scene.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('set_act', this.setAction, this);
-            eventManager.off('dispatch_controller', send, this);
+            eventManager.off('dispatch_controller', getSend, this);
         });
     }
 
@@ -126,6 +130,11 @@ export default class Agent extends Phaser.GameObjects.Container
         this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new this.overlaps
         
     }
+
+    reload()
+    {
+        send('act', {dir: 'idle', x: this.init_x, y: this.init_y});
+    }
 }
 
 function spread(self) {
@@ -142,7 +151,7 @@ function overlap(self, other) {
     }
 }
 
-function send(cmd) {
+function getSend(cmd) {
 
     if (cmd.sender == this.name) {
         cmd.obj.x = this.x;
@@ -152,4 +161,13 @@ function send(cmd) {
 
         eventManager.emit('send', cmd);
     }
+}
+
+function send(req, obj) {
+    let cmd = {
+        req: req,
+        obj: obj
+    };
+    eventManager.emit('send', cmd);
+    console.log(obj.x + " ... " + obj.y);
 }

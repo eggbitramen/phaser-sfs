@@ -11,6 +11,10 @@ export default class Ball extends Phaser.GameObjects.Sprite
         super(scene, x, y, 'ball');
         this.name = 'ball';
 
+        //  Init Pos
+        this.init_x = this.x;
+        this.init_y = this.y;
+
         this.setScale(1.3);
         this.setOrigin(0.5, 0.5);
 
@@ -23,7 +27,7 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.overlaps = [];
         
-        send('ball', {x: this.x, y: this.y, velocity_x: 0, velocity_y: -1000});
+        this.reload();
 
         //events
         eventManager.on('set_ball', this.setBall, this);
@@ -119,6 +123,10 @@ export default class Ball extends Phaser.GameObjects.Sprite
         this.body.setVelocity(params.getDouble('velocity_x') * delta, params.getDouble('velocity_y')) * delta;
     }
 
+    reload() {
+        this.overlaps = [];
+        send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: -1000});
+    }
 }
 
 function checkCollide(self, other) {

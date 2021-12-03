@@ -135,17 +135,17 @@ export default class GamePlay extends Phaser.Scene
         //this.solidGroup = this.physics.add.staticGroup(goal_collider);
 
         //  moving actors
-        let p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
-        p1.kick_dir = 1;
-        let p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1]);
-        p2.kick_dir = -1;
+        this.p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
+        this.p1.kick_dir = 1;
+        this.p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1]);
+        this.p2.kick_dir = -1;
 
         //  ball
-        let ball = new Ball(this, field.width / 2, field.y + field.height / 2);
+        this.ball = new Ball(this, field.width / 2, field.y + field.height / 2);
 
-        entities = [p1, p2, ball];
+        entities = [this.p1, this.p2, this.ball];
 
-        entity_cont.add([p1, p2, ball]);
+        entity_cont.add([this.p1, this.p2, this.ball]);
 
         //  init controller
         this.controller = new Controller(this);
@@ -176,5 +176,7 @@ function renderScore(params) {
 }
 
 function resetLayout() {
-    this.scene.restart();
+    this.ball.reload();
+    this.p1.reload();
+    this.p2.reload();
 }
