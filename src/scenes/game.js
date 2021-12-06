@@ -41,10 +41,15 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('register_overlap', registerOverlap, this);
         eventManager.on('rend_score', renderScore, this);
         eventManager.on('reset_layout', resetLayout, this);
+        eventManager.on('update_timer', updateTimer, this);
+        eventManager.on('end_game', endGame, this);
 
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('register_overlap', registerOverlap, this);
             eventManager.off('rend_score', renderScore, this);
+            eventManager.off('reset_layout', resetLayout, this);
+            eventManager.off('update_timer', updateTimer, this);
+            eventManager.off('end_game', endGame, this);
         });
 
         let players = gm.getAllPlayers();
@@ -101,9 +106,11 @@ export default class GamePlay extends Phaser.Scene
                 .setOrigin(0.5, 0.5);
             scores[iplayer].owner = players[iplayer].name;
         }
+
+        this.txt_timer = this.add.text(0, 0, '30').setFontSize(30).setOrigin(0.5, 0.05);
         
         scoreboard_cont.setPosition(this.game.width / 2, scoreboard.height * 0.6).setScale(0.7);
-        scoreboard_cont.add(scoreboard);
+        scoreboard_cont.add([scoreboard, this.txt_timer]);
         scoreboard_cont.add(avatars);
         scoreboard_cont.add(scores);
         scoreboard_cont.add(names);
@@ -160,6 +167,10 @@ export default class GamePlay extends Phaser.Scene
     }
 }
 
+function updateTimer(time_in_second) {
+    this.txt_timer.setText(time_in_second);
+}
+
 function registerOverlap(object) {
     this.overlap_list.add(object);
     this.physics.add.overlap(object, this.overlap_list);
@@ -179,4 +190,10 @@ function resetLayout() {
     this.ball.reload();
     this.p1.reload();
     this.p2.reload();
+}
+
+function endGame() {
+    gm.setProperty({game_state: 2});
+    this.scene.stop(this);
+    this.scene.start('matchwrapper');
 }

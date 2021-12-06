@@ -76,7 +76,8 @@ export default class SFSClient {
                 tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
                 fee: sessionStorage.getItem("dewa.fee"),
                 prize: sessionStorage.getItem("dewa.prize"),
-                isBotAllowed: parseInt(sessionStorage.getItem("dewa.bot"))
+                isBotAllowed: parseInt(sessionStorage.getItem("dewa.bot")),
+                game_state: 1
             });
         }
         else{
@@ -92,7 +93,8 @@ export default class SFSClient {
                 website_id: sessionStorage.getItem("dewa.website_id"),
                 nickname: sessionStorage.getItem("dewa.username"),
                 tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
-                isBotAllowed: 0
+                isBotAllowed: 0,
+                game_state: 1
             });
         }
         
@@ -271,6 +273,9 @@ function onExtensionResponse(event)
                 eventManager.emit('start_game');
             }
             break;
+        case 'timer':
+            eventManager.emit('update_timer', event.params.getUtfString('value'));
+            break;
         case 'act':
             eventManager.emit('set_act', event.params);
             break;
@@ -282,6 +287,9 @@ function onExtensionResponse(event)
             break;
         case 'reset':
             eventManager.emit('reset_layout');
+            break;
+        case 'end':
+            eventManager.emit('end_game');
             break;
     }
 }

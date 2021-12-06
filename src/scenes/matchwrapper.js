@@ -23,11 +23,11 @@ export default class MatchWrapper extends Phaser.Scene {
 
         avatar_container = this.add.container(this.game.width / 2, this.game.height / 2);
 
-        let header = this.add.text(0, -this.game.height / 3, "STARTING MATCH ...")
+        this.header = this.add.text(0, -this.game.height / 3, "")
             .setOrigin(0.5, 0.5)
             .setFontStyle('bold')
             .setFontSize(70);
-        avatar_container.add(header);
+        avatar_container.add(this.header);
 
         let players = gm.getAllPlayers();
         for (const p in players) {
@@ -45,6 +45,15 @@ export default class MatchWrapper extends Phaser.Scene {
             .setFontStyle('bold')
             .setFontSize(70);
         avatar_container.add(countdown);
+
+        if (gm.getProperty('game_state') == 1) {
+            this.header.setText("STARTING MATCH ...");
+        }
+        else
+        {
+            this.header.setText("RESULT");
+            countdown.setVisible(false);
+        }
 
         //  events
         eventManager.on('countdown', this.changeCountdown, this);
@@ -65,6 +74,7 @@ export default class MatchWrapper extends Phaser.Scene {
 
     startGame()
     {
+        this.scene.stop(this);
         this.scene.start('gameplay');
     }
 }
