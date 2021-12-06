@@ -133,7 +133,10 @@ export default class Agent extends Phaser.GameObjects.Container
 
     reload()
     {
-        send('act', {dir: 'idle', x: this.init_x, y: this.init_y});
+        //send('act', {dir: 'idle', x: this.init_x, y: this.init_y, no_sync: true});
+        this.dir = 'idle';
+        this.act = '';
+        this.setPosition(this.init_x, this.init_y);
     }
 }
 

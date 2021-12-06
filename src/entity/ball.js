@@ -26,8 +26,8 @@ export default class Ball extends Phaser.GameObjects.Sprite
         eventManager.emit('register_overlap', this);
 
         this.overlaps = [];
-        
-        this.reload();
+        //this.reload();
+        send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: -1000});
 
         //events
         eventManager.on('set_ball', this.setBall, this);
@@ -125,7 +125,8 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
     reload() {
         this.overlaps = [];
-        send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: -1000});
+        //send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: -1000, no_sync: true});
+        this.setPosition(this.init_x, this.init_y);
     }
 }
 

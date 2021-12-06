@@ -160,6 +160,9 @@ export default class SFSClient {
                     case 'number':
                         object.putDouble(key, cmd.obj[key]);
                         break;
+                    case 'boolean':
+                        object.putBool(key, cmd.obj[key]);
+                        break;
                 }
             }
         }
