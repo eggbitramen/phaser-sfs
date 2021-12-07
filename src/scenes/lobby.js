@@ -1,7 +1,5 @@
 import eventManager from '../tools/eventmanager';
 
-let menu_state = 0; // 0 = tutorial, 1 = find match
-
 export default class Lobby extends Phaser.Scene {
     constructor()
     {
@@ -10,6 +8,7 @@ export default class Lobby extends Phaser.Scene {
 
     create()
     {
+        this.menu_state = 0
         this.add.image(0, 0, 'lobby-bg').setScale(2); //bg
 
         this.find_match_btn = this.add.sprite(0, 0, 'button-00').setOrigin(0.5, 0.5);
@@ -25,7 +24,7 @@ export default class Lobby extends Phaser.Scene {
         this.find_match_cont = this.add.container(this.game.width / 2, this.game.height / 2);
         this.find_match_cont.setVisible(false);
         
-        this.find_match_info = this.add.text(0, 0, "Finding Match")
+        this.find_match_info = this.add.text(0, 0, "Waiting for Players")
             .setOrigin(0.5, 0.5)
             .setFontSize(30)
             .setFontStyle('bold');
@@ -44,6 +43,10 @@ export default class Lobby extends Phaser.Scene {
 
         eventManager.on('ready', this.showReadyMember, this);
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
+
+        this.game.events.on(Phaser.Core.Events.BLUR, () => {
+            this.forceExitMatch();
+        }, this);
         
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
             this.find_match_btn.off('pointerup', () => {
@@ -51,6 +54,10 @@ export default class Lobby extends Phaser.Scene {
             });
             eventManager.off('ready', this.showReadyMember, this);
             eventManager.off('enter-matchwrapper', this.enterMatchWrapper, this);
+
+            this.game.events.off(Phaser.Core.Events.BLUR, () => {
+                this.forceExitMatch();
+            }, this);
         });
     }
 
@@ -66,9 +73,9 @@ export default class Lobby extends Phaser.Scene {
     }
 
     toggleLobbyState() {
-        if (menu_state == 0)
+        if (this.menu_state == 0)
         {
-            menu_state = 1;
+            this.menu_state = 1;
             this.find_match_txt.setTexture('sprtxt-cancel');
             this.tutorial_cont.setVisible(false);
             this.find_match_cont.setVisible(true);
@@ -77,12 +84,19 @@ export default class Lobby extends Phaser.Scene {
         }
         else
         {
-            menu_state = 0;
+            this.menu_state = 0;
             this.find_match_txt.setTexture('sprtxt-start');
             this.find_match_cont.setVisible(false);
             this.tutorial_cont.setVisible(true);
     
             eventManager.emit('exit-match');
+        }
+    }
+
+    forceExitMatch()
+    {
+        if (this.menu_state == 1) {
+            this.toggleLobbyState();
         }
     }
 }

@@ -44,12 +44,22 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('update_timer', updateTimer, this);
         eventManager.on('end_game', endGame, this);
 
+        this.game.events.on(Phaser.Core.Events.BLUR, () => {
+            // kill me, empty score
+            endGame();
+        }, this);
+
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('register_overlap', registerOverlap, this);
             eventManager.off('rend_score', renderScore, this);
             eventManager.off('reset_layout', resetLayout, this);
             eventManager.off('update_timer', updateTimer, this);
             eventManager.off('end_game', endGame, this);
+
+            this.game.events.off(Phaser.Core.Events.BLUR, () => {
+                // kill me, empty score
+                endGame();
+            }, this);
         });
 
         let players = gm.getAllPlayers();
@@ -177,9 +187,9 @@ function registerOverlap(object) {
 }
 
 function renderScore(params) {
-    console.log(params);
+    // console.log(params);
     scores.forEach( function(score_txt) {
-        console.log(score_txt);
+        // console.log(score_txt);
         if (score_txt.owner == params.getUtfString('owner')) {
             score_txt.setText(String(params.getDouble('new_score')));
         }

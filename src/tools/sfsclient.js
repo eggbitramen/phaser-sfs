@@ -6,11 +6,18 @@ let sfs;
 let gm;
 
 let sfs_config = {
+    
+    zone: 'BasicExamples',
+    
     host: '127.0.0.1',
     port: 8090,
-    zone: 'BasicExamples',
-    debug: false,
-    useSSl: false
+    useSSL: false,
+    
+    // host: 'staireight.com',
+    // port: 8443,
+    // useSSl: true,
+
+    debug: false
 };
 
 export default class SFSClient {
@@ -38,6 +45,7 @@ export default class SFSClient {
 
         gm = GameManager.getInstance();
         gm.setProperty({
+            //room_group_name: 'bolamania',
             room_group_name: 'gameroomdev',
             players: 2
         });
@@ -45,7 +53,9 @@ export default class SFSClient {
         // add sfs event dispatch
         eventManager.on('connect', this.connect, this);
         eventManager.on('find-match', this.findMatch, this);
+        eventManager.on('exit-match', this.leaveMatch, this);
         eventManager.on('send', this.send, this);
+        eventManager.on('lost_focus', this.leaveMatch, this);
     }
 
     getProperties() 
@@ -137,7 +147,7 @@ export default class SFSClient {
 
     findMatch()
     {
-        console.log('finding match');
+        // console.log('finding match');
         let existedRoomCount = sfs.roomManager.getRoomListFromGroup(gm.getProperties().room_group_name).length;
         if (existedRoomCount > 0)
         {
@@ -146,6 +156,15 @@ export default class SFSClient {
             sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [gm.getProperties().room_group_name], sfs.lastJoinedRoom));	
         } else {
             this.createMatch();
+        }
+    }
+
+    leaveMatch()
+    {
+        console.log(gm.getProperty('current_room').name);
+        if (gm.getProperty('current_room').name != "The Lobby")
+        {
+            sfs.send(new SFS2X.JoinRoomRequest("The Lobby", null, sfs.lastJoinedRoom.id));
         }
     }
 
@@ -204,7 +223,7 @@ function onConnection(event)
 function onConnectionLost(event)
 {
 	console.log("Game disconnected : " + event.reason);
-	//returnToLobby();
+	returnToLobby();
 }
 
 function onLoginError(event)
@@ -238,6 +257,7 @@ function onRoomJoin(event)
 
     switch (event.room.name) {
         case "The Lobby":
+            gm.setProperty({ game_state: 1 });
             eventManager.emit('enter-loby');
             break;
     }
@@ -260,7 +280,7 @@ function onExtensionResponse(event)
             console.log(event.params.getUtfString('msg'));
             break;
         case 'ready_msg':
-            console.log(event.params.getUtfString('value'));
+            // console.log(event.params.getUtfString('value'));
             eventManager.emit('ready', event.params.getUtfString('value'));
             break;
         case 'ready':
@@ -292,4 +312,12 @@ function onExtensionResponse(event)
             eventManager.emit('end_game');
             break;
     }
+}
+
+//  Misc Helper
+
+function returnToLobby()
+{
+	sfs.disconnect();
+	window.open("https://staireight.com/games/lobby-game", "_self");
 }

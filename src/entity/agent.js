@@ -172,5 +172,5 @@ function send(req, obj) {
         obj: obj
     };
     eventManager.emit('send', cmd);
-    console.log(obj.x + " ... " + obj.y);
+    // console.log(obj.x + " ... " + obj.y);
 }
