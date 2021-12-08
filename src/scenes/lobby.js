@@ -44,7 +44,7 @@ export default class Lobby extends Phaser.Scene {
         eventManager.on('ready', this.showReadyMember, this);
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
 
-        this.game.events.on(Phaser.Core.Events.BLUR, () => {
+        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             this.forceExitMatch();
         }, this);
         
@@ -55,7 +55,7 @@ export default class Lobby extends Phaser.Scene {
             eventManager.off('ready', this.showReadyMember, this);
             eventManager.off('enter-matchwrapper', this.enterMatchWrapper, this);
 
-            this.game.events.off(Phaser.Core.Events.BLUR, () => {
+            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 this.forceExitMatch();
             }, this);
         });

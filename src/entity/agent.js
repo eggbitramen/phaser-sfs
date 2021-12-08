@@ -19,17 +19,17 @@ export default class Agent extends Phaser.GameObjects.Container
 
         let color = mirrored ? 'red' : 'green';
         let offset = mirrored ? 1 : -1;
-        let shoe = this.scene.add.sprite(0, 0, color + '_shoe')
+        this.shoe = this.scene.add.sprite(0, 0, color + '_shoe')
             .setOrigin(0.5 + 0.1 * offset, 0.05)
             .setFlipX(mirrored)
             .setScale(0.45);
-        let head = this.scene.add.sprite(0, 0, color + '_head')
+        this.head = this.scene.add.sprite(0, 0, color + '_head')
             .setOrigin(0.5, 0.65)
             .setFlipX(mirrored)
             .setScale(0.75);
 
-        this.add(shoe);
-        this.add(head);
+        this.add(this.shoe);
+        this.add(this.head);
 
         this.setSize(110, 110);
         this.scene.physics.world.enable(this);
@@ -80,6 +80,7 @@ export default class Agent extends Phaser.GameObjects.Container
 
             this.dir = params.getUtfString('dir') ? params.getUtfString('dir') : this.dir;
             this.act = params.getUtfString('act') ? params.getUtfString('act') : this.act;
+            
         }
     }
 
@@ -89,12 +90,15 @@ export default class Agent extends Phaser.GameObjects.Container
         switch (this.dir) {
             case 'right':
                 this.body.velocity.x = SPEED * delta;
+                this.rotateHeadTo(-20);
                 break;
             case 'left':
                 this.body.velocity.x = -SPEED * delta;
+                this.rotateHeadTo(20);
                 break;
             case 'idle':
                 this.body.velocity.x = 0;
+                this.rotateHeadTo(0);
                 break;
             default:        //  idle
                 this.body.velocity.x = 0;
@@ -129,6 +133,15 @@ export default class Agent extends Phaser.GameObjects.Container
 
         this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new this.overlaps
         
+    }
+
+    rotateHeadTo(dest)
+    {
+        let vec = dest - this.head.angle;
+        let dif = Math.abs(vec);
+        if (dif > 1) {
+            this.head.angle += 7 * Math.sign(vec);
+        }
     }
 
     reload()

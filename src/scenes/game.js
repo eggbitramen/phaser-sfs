@@ -44,7 +44,7 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('update_timer', updateTimer, this);
         eventManager.on('end_game', endGame, this);
 
-        this.game.events.on(Phaser.Core.Events.BLUR, () => {
+        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             // kill me, empty score
             endGame();
         }, this);
@@ -56,7 +56,7 @@ export default class GamePlay extends Phaser.Scene
             eventManager.off('update_timer', updateTimer, this);
             eventManager.off('end_game', endGame, this);
 
-            this.game.events.off(Phaser.Core.Events.BLUR, () => {
+            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 // kill me, empty score
                 endGame();
             }, this);

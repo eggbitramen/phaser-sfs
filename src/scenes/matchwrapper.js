@@ -60,7 +60,7 @@ export default class MatchWrapper extends Phaser.Scene {
         eventManager.on('start_game', this.startGame, this);
         eventManager.on('enter-loby', this.enterLoby, this);
 
-        this.game.events.on(Phaser.Core.Events.BLUR, () => {
+        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             lostFocus();
         }, this);
 
@@ -69,7 +69,7 @@ export default class MatchWrapper extends Phaser.Scene {
             eventManager.off('start_game', this.startGame, this);
             eventManager.off('enter-loby', this.enterLoby, this);
 
-            this.game.events.off(Phaser.Core.Events.BLUR, () => {
+            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 lostFocus();
             }, this);
         });
