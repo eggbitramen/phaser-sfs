@@ -40,6 +40,7 @@ export default class GamePlay extends Phaser.Scene
         //events
         eventManager.on('register_overlap', registerOverlap, this);
         eventManager.on('rend_score', renderScore, this);
+        eventManager.once('begin_game', beginGame, this);
         eventManager.on('reset_layout', resetLayout, this);
         eventManager.on('update_timer', updateTimer, this);
         eventManager.on('end_game', endGame, this);
@@ -134,8 +135,21 @@ export default class GamePlay extends Phaser.Scene
         let bt_lo = new Button(this, anch_x_offset * 14, anch_y, 'btn_lo', 'lo');
         let bt_hi = new Button(this, anch_x_offset * 17.5, anch_y, 'btn_hi', 'hi');
 
+        //  popup components
+        this.txt_ready = this.add.image(0, 0, 'ready')
+            .setOrigin(0.5, 0.5)
+            .setScale(0.2)
+            .setPosition(this.game.width / 2, this.game.height / 2);
+        this.tw_popup = this.tweens.add({
+            targets: this.txt_ready,
+            duration: 100,
+            paused: true,
+            scale: 0.5
+        });
+
         background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1], goal_collider[0], goal_collider[1]]);
         foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont, bt_left, bt_right, bt_jump, bt_lo, bt_hi]);
+        foreground_cont.add([this.txt_ready]);
 
         //  world bounds and colliders
         let solids = [];
@@ -185,7 +199,11 @@ function registerOverlap(object) {
 }
 
 function renderScore(params) {
-    // console.log(params);
+    
+    this.txt_ready.setTexture('goal').setScale(0.2);
+    this.txt_ready.setVisible(true);
+    this.tw_popup.play(true);
+
     scores.forEach( function(score_txt) {
         // console.log(score_txt);
         if (score_txt.owner == params.getUtfString('owner')) {
@@ -194,10 +212,19 @@ function renderScore(params) {
     });
 }
 
+function beginGame() {
+    this.txt_ready.setTexture('kick_off');
+    this.tw_popup.play(true);
+    setTimeout(() => {
+        this.txt_ready.setVisible(false);
+    }, 1000);
+}
+
 function resetLayout() {
     this.ball.reload();
     this.p1.reload();
     this.p2.reload();
+    this.txt_ready.setVisible(false);
 }
 
 function endGame() {

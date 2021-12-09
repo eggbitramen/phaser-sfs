@@ -45,6 +45,11 @@ export default class Boot extends Phaser.Scene {
         this.load.image('btn_right', 'game/btn_right.png');
         this.load.image('btn_left', 'game/btn_left.png');
 
+        //  popup
+        this.load.image('kick_off', 'game/kick_off.png');
+        this.load.image('ready', 'game/ready.png');
+        this.load.image('goal', 'game/goal.png');
+
         this.load.once('complete', () => {
             this.goToLogin();
         });

@@ -295,6 +295,7 @@ function onExtensionResponse(event)
             break;
         case 'timer':
             eventManager.emit('update_timer', event.params.getUtfString('value'));
+            eventManager.emit('begin_game');
             break;
         case 'act':
             eventManager.emit('set_act', event.params);
