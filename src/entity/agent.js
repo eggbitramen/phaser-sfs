@@ -7,7 +7,7 @@ const MASS_GRAVITY = 5000;
 
 export default class Agent extends Phaser.GameObjects.Container
 {
-    constructor(scene, x, y, mirrored, player)
+    constructor(scene, x, y, mirrored, player, kick_dir)
     {
         super(scene, x, y)
 
@@ -47,9 +47,36 @@ export default class Agent extends Phaser.GameObjects.Container
         this.dir = "";
         this.act = "";
 
-        this.kick_dir = 0;
+        this.kick_dir = kick_dir;
 
         this.overlaps = [];
+
+        // Tweens
+        this.tweens = {};
+        this.tweens.jump = this.scene.tweens.add({
+            targets: this.shoe,
+            duration: 200,
+            angle: 20 * this.kick_dir,
+            paused: true,
+            yoyo: true,
+            onComplete: () => { this.shoe.angle = 0 }
+        });
+        this.tweens.hi = this.scene.tweens.add({
+            targets: this.shoe,
+            duration: 100,
+            angle: -20 * this.kick_dir,
+            paused: true,
+            yoyo: true,
+            onComplete: () => { this.shoe.angle = 0 }
+        });
+        this.tweens.lo = this.scene.tweens.add({
+            targets: this.shoe,
+            duration: 100,
+            angle: -30 * this.kick_dir,
+            paused: true,
+            yoyo: true,
+            onComplete: () => { this.shoe.angle = 0 }
+        });
 
         //  events
         eventManager.on('set_act', this.setAction, this);
@@ -90,11 +117,11 @@ export default class Agent extends Phaser.GameObjects.Container
         switch (this.dir) {
             case 'right':
                 this.body.velocity.x = SPEED * delta;
-                this.rotateHeadTo(-20);
+                this.rotateHeadTo(-10);
                 break;
             case 'left':
                 this.body.velocity.x = -SPEED * delta;
-                this.rotateHeadTo(20);
+                this.rotateHeadTo(10);
                 break;
             case 'idle':
                 this.body.velocity.x = 0;
@@ -108,12 +135,15 @@ export default class Agent extends Phaser.GameObjects.Container
         switch (this.act) {
             case 'jump':
                 this.body.velocity.y = -JUMP_STR * delta;
+                this.tweens.jump.play(true);
                 break;
             case 'hi':
                 if (this.name == this.gm.getProperty('user_id')) spread(this);
+                this.tweens.hi.play(true);
                 break;
             case 'lo':
                 if (this.name == this.gm.getProperty('user_id')) spread(this);
+                this.tweens.lo.play(true);
                 break;
         }
         this.act = "";
@@ -140,8 +170,13 @@ export default class Agent extends Phaser.GameObjects.Container
         let vec = dest - this.head.angle;
         let dif = Math.abs(vec);
         if (dif > 1) {
-            this.head.angle += 7 * Math.sign(vec);
+            this.head.angle += 5 * Math.sign(vec);
         }
+    }
+
+    rotateShoeTo(dest)
+    {
+
     }
 
     reload()

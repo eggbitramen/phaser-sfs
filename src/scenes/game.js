@@ -152,10 +152,8 @@ export default class GamePlay extends Phaser.Scene
         //this.solidGroup = this.physics.add.staticGroup(goal_collider);
 
         //  moving actors
-        this.p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0]);
-        this.p1.kick_dir = 1;
-        this.p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1]);
-        this.p2.kick_dir = -1;
+        this.p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0], 1);
+        this.p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1], -1);
 
         //  ball
         this.ball = new Ball(this, field.width / 2, field.y + field.height / 2);
