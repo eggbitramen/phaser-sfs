@@ -31,6 +31,14 @@ export default class Agent extends Phaser.GameObjects.Container
         this.add(this.shoe);
         this.add(this.head);
 
+        //  self player marker
+        if (player.name == this.gm.getProperty('user_id')) {
+            let marker_size = 20;
+            this.marker = this.scene.add.triangle(20, -70, 0, 0, marker_size, -marker_size * 3/2, - marker_size, -marker_size * 3/2, 0xb1eb34);
+            this.marker.setStrokeStyle(2, 0x92c22b);
+            this.add(this.marker);
+        }
+
         this.setSize(110, 110);
         this.scene.physics.world.enable(this);
         this.body.setCircle(55);
