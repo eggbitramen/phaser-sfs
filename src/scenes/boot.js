@@ -19,6 +19,9 @@ export default class Boot extends Phaser.Scene {
         this.load.image('sprtxt-exit', 'wrapper/sprtxt-exit.png');
         this.load.image('sprtxt-rematch', 'wrapper/sprtxt-rematch.png');
         this.load.image('avatar-none', 'wrapper/avatar-none.png');
+        this.load.image('crown', 'wrapper/crown.png');
+        this.load.image('iccoin', 'wrapper/iccoin.png');
+        this.load.image('icdiamond', 'wrapper/icdiamond.png');
 
         this.load.image('ball_shadow', 'game/ball_shadow.png');
         this.load.image('bg_night', 'game/bg_night.png');

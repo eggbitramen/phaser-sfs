@@ -309,6 +309,9 @@ function onExtensionResponse(event)
         case 'reset':
             eventManager.emit('reset_layout');
             break;
+        case 'winner':
+            console.log(event.params.getUtfString('value'));
+            break;
         case 'end':
             eventManager.emit('end_game');
             break;
