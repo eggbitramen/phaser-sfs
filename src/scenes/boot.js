@@ -15,6 +15,8 @@ export default class Boot extends Phaser.Scene {
         this.load.image('button-00', 'wrapper/button-00.png');
         this.load.image('button-01', 'wrapper/button-01.png');
         this.load.image('sprtxt-start', 'wrapper/sprtxt-start.png');
+        this.load.image('sprtxt-win', 'wrapper/sprtxt-win.png');
+        this.load.image('sprtxt-lose', 'wrapper/sprtxt-lose.png');
         this.load.image('sprtxt-cancel', 'wrapper/sprtxt-cancel.png');
         this.load.image('sprtxt-exit', 'wrapper/sprtxt-exit.png');
         this.load.image('sprtxt-rematch', 'wrapper/sprtxt-rematch.png');

@@ -253,7 +253,7 @@ function onRoomJoinError(event)
 
 function onRoomJoin(event)
 {
-    gm.setProperty({current_room: event.room});
+    gm.setProperty({current_room: event.room, winner: ''});
 
     switch (event.room.name) {
         case "The Lobby":
@@ -310,7 +310,15 @@ function onExtensionResponse(event)
             eventManager.emit('reset_layout');
             break;
         case 'winner':
-            console.log(event.params.getUtfString('value'));
+            gm.setProperty({
+                winner: event.params.getUtfString('winner')
+            });
+            let players = gm.getAllPlayers();
+            for (const p in players) {
+                players[p].score = event.params.getInt(players[p].name);
+            }
+            console.log(players);
+            eventManager.emit('winner', event.params.getUtfString('value'));
             break;
         case 'end':
             eventManager.emit('end_game');

@@ -29,7 +29,7 @@ export default class MatchWrapper extends Phaser.Scene {
             .setFontStyle('bold')
             .setFontSize(70);
         
-        let crown = this.add.image(0, 0, 'crown').setOrigin(0.5, 0.5).setVisible(false);
+        let crown = this.add.image(0, 0, 'crown').setOrigin(0.5, 0.645).setVisible(false).setScale(0.85);
 
         avatar_container.add([this.header, crown]);
 
@@ -41,9 +41,15 @@ export default class MatchWrapper extends Phaser.Scene {
             avatar_image.setPosition(((-players.length / 2) + parseInt(p) * 2) * avatar_image.width, -50);
             avatar_name.setPosition(avatar_image.x, avatar_image.y + 110);
 
+            //attach crown
+            if (gm.getProperty('winner') == player.name) {
+                crown.setPosition(avatar_image.x, avatar_image.y);
+                crown.setVisible(true);
+            }
+
             let field_score = this.add.rectangle(avatar_image.x, avatar_image.y + 70, 100, 40, 0x000000, 0.5).setOrigin(0.5, 0.5);
             let txt_score = this.add.text(field_score.x, field_score.y - field_score.height / 2, 'score').setOrigin(0.5, 0.5).setFontSize(20).setStroke(0x000000, 5);
-            let t_score = this.add.text(field_score.x, field_score.y, '999999').setOrigin(0.5, 0.5).setFontSize(25);
+            let t_score = this.add.text(field_score.x, field_score.y, player.score).setOrigin(0.5, 0.5).setFontSize(25);
             avatar_container.add([avatar_image, avatar_name]);
             postgame_container.add([field_score, txt_score, t_score]);
         }

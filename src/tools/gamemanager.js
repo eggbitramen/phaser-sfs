@@ -22,7 +22,8 @@ export default class GameManager {
             let player = {
                 name: player_obj.getUtfString('name'),
                 nickname: player_obj.getUtfString('nickname'),
-                avatar_url: player_obj.getUtfString('avatar')
+                avatar_url: player_obj.getUtfString('avatar'),
+                score: 0
             };
             players.push(player);
         }

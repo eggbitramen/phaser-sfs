@@ -44,6 +44,7 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('reset_layout', resetLayout, this);
         eventManager.on('update_timer', updateTimer, this);
         eventManager.on('end_game', endGame, this);
+        eventManager.on('winner', showWinner, this);
 
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             // kill me, empty score
@@ -56,6 +57,7 @@ export default class GamePlay extends Phaser.Scene
             eventManager.off('reset_layout', resetLayout, this);
             eventManager.off('update_timer', updateTimer, this);
             eventManager.off('end_game', endGame, this);
+            eventManager.off('winner', showWinner, this);
 
             this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 // kill me, empty score
@@ -225,6 +227,14 @@ function resetLayout() {
     this.p1.reload();
     this.p2.reload();
     this.txt_ready.setVisible(false);
+}
+
+function showWinner(winner) {
+    this.txt_ready.setTexture('sprtxt-lose');
+    if (winner == gm.getProperty('user_id')) {
+        this.txt_ready.setTexture('sprtxt-win');
+    }
+    this.txt_ready.setVisible(true);
 }
 
 function endGame() {
