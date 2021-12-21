@@ -229,9 +229,9 @@ function resetLayout() {
     this.txt_ready.setVisible(false);
 }
 
-function showWinner(winner) {
+function showWinner() {
     this.txt_ready.setTexture('sprtxt-lose');
-    if (winner == gm.getProperty('user_id')) {
+    if (gm.getProperty('winner') == gm.getProperty('user_id')) {
         this.txt_ready.setTexture('sprtxt-win');
     }
     this.txt_ready.setVisible(true);

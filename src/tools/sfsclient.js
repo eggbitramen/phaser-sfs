@@ -136,10 +136,11 @@ export default class SFSClient {
         settings.notifyGameStarted = true;
         settings.extension = new SFS2X.RoomExtension("JavaScript", "bolamania.js");
         
+        let websiteId = new SFS2X.SFSRoomVariable("website_id", gm.getProperties().website_id);
         let roomId = new SFS2X.SFSRoomVariable("roomid", gm.getProperties().tournamentId);
         let isBotAllowed = new SFS2X.SFSRoomVariable("isBotAllowed", gm.getProperties().isBotAllowed);
         
-        settings.variables = [roomId, isBotAllowed];
+        settings.variables = [websiteId, roomId, isBotAllowed];
 
         sfs.send(new SFS2X.CreateSFSGameRequest(settings));
         
@@ -318,7 +319,7 @@ function onExtensionResponse(event)
                 players[p].score = event.params.getInt(players[p].name);
             }
             console.log(players);
-            eventManager.emit('winner', event.params.getUtfString('value'));
+            eventManager.emit('winner');
             break;
         case 'end':
             eventManager.emit('end_game');
