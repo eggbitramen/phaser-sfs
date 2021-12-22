@@ -144,8 +144,22 @@ function checkOverlap(self, other) {
     if (!self.overlaps.includes(other.name)) {   // on overlap start
         self.overlaps.push(other.name);
         
+        //  goalpal
+        gPal(self, other);
+
         //   score
         score(other);
+    }
+}
+
+function gPal(self, static_body) {
+    switch (static_body.name) {
+        case 'solid_left':
+            send('ball', {x: self.x, y: self.y, dir_x: 1, dir_y: -1});
+            break;
+        case 'solid_right':
+            send('ball', {x: self.x, y: self.y, dir_x: -1, dir_y: -1});
+            break;
     }
 }
 
@@ -178,16 +192,12 @@ function bounce(self, static_body) {
         case 'rect_down':
             y_dir = -1;
             break;
-        case 'circ_left':
-            bounce_result = bounceCircle(self, static_body);
-            x_dir = bounce_result.x_dir;
-            y_dir = bounce_result.y_dir;
-            break;
-        case 'circ_right':
-            bounce_result = bounceCircle(self, static_body);
-            x_dir = bounce_result.x_dir;
-            y_dir = bounce_result.y_dir;
-            break;
+        // case 'solid_left':
+        //     this.interact(static_body);
+        //     break;
+        // case 'solid_right':
+        //     this.interact(static_body);
+        //     break;
     }
 
     send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir});

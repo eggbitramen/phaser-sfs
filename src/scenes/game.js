@@ -95,8 +95,22 @@ export default class GamePlay extends Phaser.Scene
         goal_collider[1].name = 'goal_right';
         goal_collider[1].owner = gm.getAllPlayers()[0].name;
 
+        // Goal Top Collider
+        let goal_top = [];
+        goal_top[0] = this.add.container()
+            .setPosition(goal_collider[0].x + goal_collider[0].width * 2/3, goal_collider[0].y - goal_collider[0].height);
+        goal_top[0].name = 'solid_left';
+        goal_top[1] = this.add.container()
+            .setPosition(goal_collider[1].x - goal_collider[1].width * 3/2, goal_collider[1].y - goal_collider[1].height);
+        goal_top[1].name = 'solid_right';
+
         eventManager.emit('register_overlap', goal_collider[0]);
         eventManager.emit('register_overlap', goal_collider[1]);
+        eventManager.emit('register_overlap', goal_top[0]);
+        eventManager.emit('register_overlap', goal_top[1]);
+        
+        goal_top[0].body.setCircle(25);
+        goal_top[1].body.setCircle(25);
 
         //  scoreboard components
         let scoreboard_cont = this.add.container();
