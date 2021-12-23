@@ -16,8 +16,7 @@ var game_config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true,
-            //gravity: {y:5000}
+            debug: false
         }
     },
     scale: {

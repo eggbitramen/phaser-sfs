@@ -68,7 +68,7 @@ export default class MatchWrapper extends Phaser.Scene {
         for (const i in offset) {
             field_black[i] = this.add.rectangle(120 * offset[i], 170, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
             currency_icon[i] = this.add.image(field_black[i].x - field_black[i].width * 3/5, field_black[i].y, icname[i]).setOrigin(0.5, 0.5);
-            txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '99999999').setOrigin(0.5, 0.5).setFontSize(30);
+            txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '-').setOrigin(0.5, 0.5).setFontSize(30);
             
             postgame_container.add([field_black[i], currency_icon[i], txt_currency[i]]);
         }
@@ -79,6 +79,13 @@ export default class MatchWrapper extends Phaser.Scene {
         }
         else
         {
+            //  get currencies
+            let cmd = {
+                req: 'currency',
+                obj: null
+            };
+            eventManager.emit('send', cmd);
+
             this.header.setText("RESULT");
             countdown.setVisible(false);
             postgame_container.setVisible(true);
