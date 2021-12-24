@@ -320,11 +320,13 @@ function onExtensionResponse(event)
             for (const p in players) {
                 players[p].score = event.params.getInt(players[p].name);
             }
-            console.log(players);
             eventManager.emit('winner');
             break;
         case 'end':
             eventManager.emit('end_game');
+            break;
+        case 'currency':
+            eventManager.emit('update-currency', event.params);
             break;
     }
 }

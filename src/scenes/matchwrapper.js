@@ -64,13 +64,13 @@ export default class MatchWrapper extends Phaser.Scene {
         let icname = ['iccoin', 'icdiamond']
         let field_black = [];
         let currency_icon = [];
-        let txt_currency = [];
+        this.txt_currency = [];
         for (const i in offset) {
             field_black[i] = this.add.rectangle(120 * offset[i], 170, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
             currency_icon[i] = this.add.image(field_black[i].x - field_black[i].width * 3/5, field_black[i].y, icname[i]).setOrigin(0.5, 0.5);
-            txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '-').setOrigin(0.5, 0.5).setFontSize(30);
+            this.txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '-').setOrigin(0.5, 0.5).setFontSize(30);
             
-            postgame_container.add([field_black[i], currency_icon[i], txt_currency[i]]);
+            postgame_container.add([field_black[i], currency_icon[i], this.txt_currency[i]]);
         }
 
         if (gm.getProperty('game_state') == 1) {
@@ -95,6 +95,7 @@ export default class MatchWrapper extends Phaser.Scene {
         eventManager.on('countdown', this.changeCountdown, this);
         eventManager.on('start_game', this.startGame, this);
         eventManager.on('enter-loby', this.enterLoby, this);
+        eventManager.on('update-currency', this.updateCurrency, this);
 
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             lostFocus();
@@ -104,6 +105,7 @@ export default class MatchWrapper extends Phaser.Scene {
             eventManager.off('countdown', this.changeCountdown, this);
             eventManager.off('start_game', this.startGame, this);
             eventManager.off('enter-loby', this.enterLoby, this);
+            eventManager.off('update-currency', this.updateCurrency, this);
 
             this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 lostFocus();
@@ -128,6 +130,12 @@ export default class MatchWrapper extends Phaser.Scene {
     {
         this.scene.stop(this);
         this.scene.start('lobby');
+    }
+
+    updateCurrency(currency)
+    {
+        this.txt_currency[0].setText(currency.getInt('coin'));
+        this.txt_currency[1].setText(currency.getInt('diamond'));
     }
 }
 
