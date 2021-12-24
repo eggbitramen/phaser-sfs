@@ -149,11 +149,13 @@ export default class SFSClient {
     findMatch()
     {
         // console.log('finding match');
-        let existedRoomCount = sfs.roomManager.getRoomListFromGroup(gm.getProperties().room_group_name).length;
-        if (existedRoomCount > 0)
+        let existed_room = sfs.roomManager.getRoomListFromGroup(gm.getProperties().room_group_name);
+        
+        if (existed_room.length > 0)
         {
             let matchExpr = new SFS2X.MatchExpression("isStarted", SFS2X.BoolMatch.EQUALS, false)
                 .and("roomid", SFS2X.NumberMatch.EQUALS, gm.getProperties().tournamentId);
+            console.log(matchExpr);
             sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [gm.getProperties().room_group_name], sfs.lastJoinedRoom));	
         } else {
             this.createMatch();
@@ -251,7 +253,7 @@ function onLogout(event)
 
 function onRoomJoinError(event)
 {
-    
+	this.createMatch();
 }
 
 function onRoomJoin(event)
