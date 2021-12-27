@@ -66,12 +66,21 @@ export default class MatchWrapper extends Phaser.Scene {
         let currency_icon = [];
         this.txt_currency = [];
         for (const i in offset) {
-            field_black[i] = this.add.rectangle(120 * offset[i], 170, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
+            field_black[i] = this.add.rectangle(120 * offset[i], 150, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
             currency_icon[i] = this.add.image(field_black[i].x - field_black[i].width * 3/5, field_black[i].y, icname[i]).setOrigin(0.5, 0.5);
             this.txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '-').setOrigin(0.5, 0.5).setFontSize(30);
             
             postgame_container.add([field_black[i], currency_icon[i], this.txt_currency[i]]);
         }
+
+        let btn_exit = this.add.sprite(-this.game.width * 1/6, 260, 'button-00')
+            .setOrigin(0.5, 0.5);
+        let txt_exit = this.add.image(btn_exit.x, btn_exit.y, 'sprtxt-exit').setOrigin(0.5, 0.5);
+
+        this.btn_rematch = this.add.sprite(this.game.width * 1/6, 260, 'button-00')
+            .setOrigin(0.5, 0.5);
+        let txt_rematch = this.add.image(this.btn_rematch.x, this.btn_rematch.y, 'sprtxt-rematch').setOrigin(0.5, 0.5);
+        postgame_container.add([btn_exit, txt_exit, this.btn_rematch, txt_rematch]);
 
         if (gm.getProperty('game_state') == 1) {
             this.header.setText("STARTING MATCH ...");
@@ -89,6 +98,9 @@ export default class MatchWrapper extends Phaser.Scene {
             this.header.setText("RESULT");
             countdown.setVisible(false);
             postgame_container.setVisible(true);
+
+            btn_exit.setInteractive();
+            // btn_rematch.setInteractive();
         }
 
         //  events
@@ -96,6 +108,14 @@ export default class MatchWrapper extends Phaser.Scene {
         eventManager.on('start_game', this.startGame, this);
         eventManager.on('enter-loby', this.enterLoby, this);
         eventManager.on('update-currency', this.updateCurrency, this);
+
+        btn_exit.on('pointerup', () => {
+            eventManager.emit('disconnect');
+        });
+
+        this.btn_rematch.on('pointerup', () => {
+            rematch();
+        });
 
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             lostFocus();
@@ -106,6 +126,14 @@ export default class MatchWrapper extends Phaser.Scene {
             eventManager.off('start_game', this.startGame, this);
             eventManager.off('enter-loby', this.enterLoby, this);
             eventManager.off('update-currency', this.updateCurrency, this);
+
+            btn_exit.off('pointerup', () => {
+                eventManager.emit('exit-to-lobby');
+            });
+    
+            this.btn_rematch.off('pointerup', () => {
+                rematch();
+            }, this);
 
             this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 lostFocus();
@@ -136,10 +164,20 @@ export default class MatchWrapper extends Phaser.Scene {
     {
         this.txt_currency[0].setText(currency.getInt('coin'));
         this.txt_currency[1].setText(currency.getInt('diamond'));
+
+        if (currency.getInt('coin') <= parseInt(gm.getProperty('fee'))) {
+            this.btn_rematch.alpha = 0.5;
+            this.btn_rematch.setInteractive();
+        }
     }
 }
 
 function lostFocus() {
     if (gm.getProperty('game_state') == 1)
         eventManager.emit('lost_focus');   
+}
+
+function rematch() {
+    this.scene.stop(this);
+    this.scene.start('lobby');
 }

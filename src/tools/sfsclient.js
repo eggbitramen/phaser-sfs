@@ -9,13 +9,13 @@ let sfs_config = {
     
     zone: 'BasicExamples',
     
-    // host: '127.0.0.1',
-    // port: 8090,
-    // useSSL: false,
+    host: '127.0.0.1',
+    port: 8090,
+    useSSL: false,
     
-    host: 'staireight.com',
-    port: 8443,
-    useSSL: true,
+    // host: 'staireight.com',
+    // port: 8443,
+    // useSSL: true,
 
     debug: false
 };
@@ -45,8 +45,8 @@ export default class SFSClient {
 
         gm = GameManager.getInstance();
         gm.setProperty({
-            room_group_name: 'bolamania',
-            //room_group_name: 'gameroomdev',
+            //room_group_name: 'bolamania',
+            room_group_name: 'gameroomdev',
             players: 2
         });
 
@@ -56,6 +56,7 @@ export default class SFSClient {
         eventManager.on('exit-match', this.leaveMatch, this);
         eventManager.on('send', this.send, this);
         eventManager.on('lost_focus', this.leaveMatch, this);
+        eventManager.on('disconnect', this.disconnect, this);
     }
 
     getProperties() 
@@ -71,7 +72,7 @@ export default class SFSClient {
     connect()
     {
         //fetch client data
-        //sessionStorage.clear();
+        sessionStorage.clear();
         if (
         typeof sessionStorage["dewa.uid"] !== "undefined" &&
         typeof sessionStorage["dewa.roomid"] !== "undefined"
@@ -90,23 +91,23 @@ export default class SFSClient {
                 game_state: 1
             });
         }
-        // else{
-        //     sessionStorage.setItem("dewa.uid", "UserTest" + Math.floor(Math.random() * 50));
-        //     sessionStorage.setItem("dewa.game_id", 11);
-        //     sessionStorage.setItem("dewa.website_id", 1);
-        //     sessionStorage.setItem("dewa.username", sessionStorage.getItem("dewa.uid") + "-nickname");
-        //     sessionStorage.setItem("dewa.roomid", 10);
+        else{
+            sessionStorage.setItem("dewa.uid", "UserTest" + Math.floor(Math.random() * 50));
+            sessionStorage.setItem("dewa.game_id", 11);
+            sessionStorage.setItem("dewa.website_id", 1);
+            sessionStorage.setItem("dewa.username", sessionStorage.getItem("dewa.uid") + "-nickname");
+            sessionStorage.setItem("dewa.roomid", 10);
             
-        //     gm.setProperty({
-        //         user_id: sessionStorage.getItem("dewa.uid"),
-        //         game_id: sessionStorage.getItem("dewa.game_id"),
-        //         website_id: sessionStorage.getItem("dewa.website_id"),
-        //         nickname: sessionStorage.getItem("dewa.username"),
-        //         tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
-        //         isBotAllowed: 0,
-        //         game_state: 1
-        //     });
-        // }
+            gm.setProperty({
+                user_id: sessionStorage.getItem("dewa.uid"),
+                game_id: sessionStorage.getItem("dewa.game_id"),
+                website_id: sessionStorage.getItem("dewa.website_id"),
+                nickname: sessionStorage.getItem("dewa.username"),
+                tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
+                isBotAllowed: 0,
+                game_state: 1
+            });
+        }
         
         if (sfs.isConnected)
         {
@@ -169,6 +170,11 @@ export default class SFSClient {
         {
             sfs.send(new SFS2X.JoinRoomRequest("The Lobby", null, sfs.lastJoinedRoom.id));
         }
+    }
+
+    disconnect()
+    {
+        sfs.disconnect();
     }
 
     send(cmd)
