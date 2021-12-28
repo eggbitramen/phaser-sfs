@@ -6,6 +6,12 @@ export default class Lobby extends Phaser.Scene {
         super('lobby');
     }
 
+    init(data)
+    {
+        console.log(data);
+        this.rematch = data.rematch;
+    }
+
     create()
     {
         this.menu_state = 0
@@ -38,11 +44,18 @@ export default class Lobby extends Phaser.Scene {
 
         // add events
         this.find_match_btn.on('pointerup', () => {
-            this.toggleLobbyState();
+            this.find_match_btn.alpha == 1.0
+                this.toggleLobbyState();
         });
+
+        // rematch
+        if (this.rematch && this.menu_state == 0) {
+            this.toggleLobbyState();
+        }
 
         eventManager.on('ready', this.showReadyMember, this);
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
+        eventManager.on('lobby-state', this.lobbyState, this);
 
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             this.forceExitMatch();
@@ -54,6 +67,7 @@ export default class Lobby extends Phaser.Scene {
             });
             eventManager.off('ready', this.showReadyMember, this);
             eventManager.off('enter-matchwrapper', this.enterMatchWrapper, this);
+            eventManager.off('lobby-state', this.lobbyState, this);
 
             this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 this.forceExitMatch();
@@ -72,25 +86,35 @@ export default class Lobby extends Phaser.Scene {
         this.scene.start('matchwrapper');
     }
 
-    toggleLobbyState() {
+    toggleLobbyState() 
+    {
+        this.find_match_btn.alpha = 0.3;
         if (this.menu_state == 0)
         {
             this.menu_state = 1;
             this.find_match_txt.setTexture('sprtxt-cancel');
-            this.tutorial_cont.setVisible(false);
-            this.find_match_cont.setVisible(true);
-    
             eventManager.emit('find-match');
         }
         else
         {
             this.menu_state = 0;
             this.find_match_txt.setTexture('sprtxt-start');
-            this.find_match_cont.setVisible(false);
-            this.tutorial_cont.setVisible(true);
-    
             eventManager.emit('exit-match');
         }
+    }
+
+    lobbyState(room_name)
+    {
+        if (room_name == "The Lobby") {
+            this.find_match_cont.setVisible(false);
+            this.tutorial_cont.setVisible(true);
+        }
+        else
+        {
+            this.tutorial_cont.setVisible(false);
+            this.find_match_cont.setVisible(true);
+        }
+        this.find_match_btn.alpha = 1.0;
     }
 
     forceExitMatch()

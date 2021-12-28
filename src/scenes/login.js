@@ -21,6 +21,6 @@ export default class Login extends Phaser.Scene {
     enterLoby()
     {
         this.scene.stop(this);
-        this.scene.start('lobby');
+        this.scene.start('lobby', {rematch: false});
     }
 }

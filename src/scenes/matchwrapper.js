@@ -114,7 +114,7 @@ export default class MatchWrapper extends Phaser.Scene {
         });
 
         this.btn_rematch.on('pointerup', () => {
-            rematch();
+            rematch(this);
         });
 
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
@@ -132,8 +132,8 @@ export default class MatchWrapper extends Phaser.Scene {
             });
     
             this.btn_rematch.off('pointerup', () => {
-                rematch();
-            }, this);
+                rematch(this);
+            });
 
             this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
                 lostFocus();
@@ -167,7 +167,11 @@ export default class MatchWrapper extends Phaser.Scene {
 
         if (currency.getInt('coin') <= parseInt(gm.getProperty('fee'))) {
             this.btn_rematch.alpha = 0.5;
+        }
+        else
+        {
             this.btn_rematch.setInteractive();
+            console.log("Button on");
         }
     }
 }
@@ -177,7 +181,8 @@ function lostFocus() {
         eventManager.emit('lost_focus');   
 }
 
-function rematch() {
-    this.scene.stop(this);
-    this.scene.start('lobby');
+function rematch(self) {
+    console.log(self);
+    self.scene.stop(self);
+    self.scene.start('lobby', {rematch: true});
 }
