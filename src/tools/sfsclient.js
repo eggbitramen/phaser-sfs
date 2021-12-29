@@ -104,7 +104,7 @@ export default class SFSClient {
         //         website_id: sessionStorage.getItem("dewa.website_id"),
         //         nickname: sessionStorage.getItem("dewa.username"),
         //         tournamentId: parseInt(sessionStorage.getItem("dewa.roomid")),
-        //         isBotAllowed: 0,
+        //         isBotAllowed: 1,
         //         game_state: 1
         //     });
         // }
@@ -156,7 +156,6 @@ export default class SFSClient {
         {
             let matchExpr = new SFS2X.MatchExpression("isStarted", SFS2X.BoolMatch.EQUALS, false)
                 .and("roomid", SFS2X.NumberMatch.EQUALS, gm.getProperties().tournamentId);
-            console.log(matchExpr);
             sfs.send(new SFS2X.QuickJoinGameRequest(matchExpr, [gm.getProperties().room_group_name], sfs.lastJoinedRoom));	
         } else {
             this.createMatch();
@@ -315,6 +314,7 @@ function onExtensionResponse(event)
             break;
         case 'ball':
             eventManager.emit('set_ball', event.params);
+            console.log(event.params.getUtfString('touch'));
             break;
         case 'rend_score':
             eventManager.emit('rend_score', event.params);
