@@ -206,7 +206,7 @@ export default class GamePlay extends Phaser.Scene
 }
 
 function updateTimer(time_in_second) {
-    this.txt_timer.setText(time_in_second);
+	this.txt_timer.setText(time_in_second);
 }
 
 function registerOverlap(object) {

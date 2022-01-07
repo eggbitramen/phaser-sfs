@@ -26,10 +26,9 @@ export default class Ball extends Phaser.GameObjects.Sprite
         eventManager.emit('register_overlap', this);
 
         this.overlaps = [];
-        //this.reload();
-        send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: 0, touch: 'none'});
+        this.synced = true;
 
-        //events
+		//events
         eventManager.on('set_ball', this.setBall, this);
         eventManager.on('spread', this.receiveSpread, this);
 
@@ -40,6 +39,12 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.body.setGravityY(MASS_GRAVITY);
     }
+
+	create()
+	{
+		console.log("Ball create");
+		send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: 0, touch: 'none'}, this);
+	}
 
     update(time, _delta)
     {
@@ -59,20 +64,6 @@ export default class Ball extends Phaser.GameObjects.Sprite
                 }
             }
         }
-
-        //  clear solid_list
-        // let solid_list = this.scene.solidGroup.getChildren();
-        // for (const i in solid_list) {
-        //     if (!this.scene.physics.overlap(this, solid_list[i]))
-        //     {
-        //         let isolid = this.overlaps.indexOf(solid_list[i].name);
-        //         if (isolid != -1) 
-        //         {
-        //             this.overlaps.splice(isolid, 1);
-        //             console.log(solid_list[i].name + " cleared");
-        //         }
-        //     }
-        // }
 
         let solid_list = this.scene.solidGroup.getChildren();
         for (const i in solid_list) {
@@ -109,7 +100,7 @@ export default class Ball extends Phaser.GameObjects.Sprite
                     break;
             }
 
-            send('ball', {x: this.x, y: this.y, velocity_x: x_vel, velocity_y: y_vel, touch: sender.name});
+            send('ball', {x: this.x, y: this.y, velocity_x: x_vel, velocity_y: y_vel, touch: sender.name}, this);
         }
     }
 
@@ -118,9 +109,9 @@ export default class Ball extends Phaser.GameObjects.Sprite
         let bounce_result = bounceCircle(this, sender);
         
         if (this.body.velocity.y == 0) {
-            send('ball', {x: this.x, y: this.y, velocity_x: 50 * bounce_result.x_dir, velocity_y: -350, touch: sender.name});
+            send('ball', {x: this.x, y: this.y, velocity_x: 50 * bounce_result.x_dir, velocity_y: -350, touch: sender.name}, this);
         } else {
-            send('ball', {x: this.x, y: this.y, dir_x: bounce_result.x_dir, dir_y: bounce_result.y_dir, touch: sender.name});
+            send('ball', {x: this.x, y: this.y, dir_x: bounce_result.x_dir, dir_y: bounce_result.y_dir, touch: sender.name}, this);
         }
         
     }
@@ -137,6 +128,8 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.setPosition(params.getDouble('x'), params.getDouble('y'));
         this.body.setVelocity(params.getDouble('velocity_x') * delta, params.getDouble('velocity_y')) * delta;
+		this.synced = true;
+		send('confirm', null, this);
     }
 
     reload() {
@@ -175,10 +168,10 @@ function checkOverlap(self, other) {
 function gPal(self, static_body) {
     switch (static_body.name) {
         case 'solid_left':
-            send('ball', {x: self.x, y: self.y, dir_x: 1, dir_y: -1, touch: static_body.name});
+            send('ball', {x: self.x, y: self.y, dir_x: 1, dir_y: -1, touch: static_body.name}, this);
             break;
         case 'solid_right':
-            send('ball', {x: self.x, y: self.y, dir_x: -1, dir_y: -1, touch: static_body.name});
+            send('ball', {x: self.x, y: self.y, dir_x: -1, dir_y: -1, touch: static_body.name}, this);
             break;
     }
 }
@@ -186,7 +179,7 @@ function gPal(self, static_body) {
 function score(goal) {
     if (goal.owner != null)
     {
-        send('score_one', { owner: goal.owner } );
+        send('score_one', { owner: goal.owner }, this);
     }
 }
 
@@ -212,15 +205,9 @@ function bounce(self, static_body) {
         case 'rect_down':
             y_dir = -1;
             break;
-        // case 'solid_left':
-        //     this.interact(static_body);
-        //     break;
-        // case 'solid_right':
-        //     this.interact(static_body);
-        //     break;
     }
 
-    send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir, touch: static_body.name});
+    send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir, touch: static_body.name}, this);
 }
 
 function bounceCircle(self, other) {
@@ -246,11 +233,23 @@ function bounceCircle(self, other) {
     return {x_dir: x_dir, y_dir: y_dir};
 }
 
-function send(req, obj) {
-    let cmd = {
-        req: req,
-        obj: obj
-    };
+function send(req, obj, this_obj) {
+	
+	let cmd = {
+		req: req,
+		obj: obj
+	};
 
-    eventManager.emit('send', cmd);
+	if (req == 'ball')
+	{
+		console.log(this_obj);
+		/*if	(self.synced)
+		{*/	
+			eventManager.emit('send', cmd);
+		//}
+	}
+	else
+	{
+		eventManager.emit('send', cmd);
+	}
 }
