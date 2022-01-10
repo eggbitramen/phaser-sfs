@@ -289,9 +289,6 @@ function onRoomCreationError(event)
 
 function onExtensionResponse(event)
 {
-
-	console.log(event.cmd);
-
     switch (event.cmd) {
         case 'trace':
             console.log(event.params.getUtfString('msg'));

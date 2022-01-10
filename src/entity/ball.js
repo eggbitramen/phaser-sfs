@@ -38,6 +38,8 @@ export default class Ball extends Phaser.GameObjects.Sprite
         });
 
         this.body.setGravityY(MASS_GRAVITY);
+
+		this.create();
     }
 
 	create()
@@ -134,8 +136,7 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
     reload() {
         this.overlaps = [];
-        //send('ball', {x: this.init_x, y: this.init_y, velocity_x: 0, velocity_y: -1000, no_sync: true});
-        this.setPosition(this.init_x, this.init_y);
+		this.setPosition(this.init_x, this.init_y);
         this.body.setVelocity(0, 0);
     }
 }
@@ -168,10 +169,10 @@ function checkOverlap(self, other) {
 function gPal(self, static_body) {
     switch (static_body.name) {
         case 'solid_left':
-            send('ball', {x: self.x, y: self.y, dir_x: 1, dir_y: -1, touch: static_body.name}, this);
+            send('ball', {x: self.x, y: self.y, dir_x: 1, dir_y: -1, touch: static_body.name}, self);
             break;
         case 'solid_right':
-            send('ball', {x: self.x, y: self.y, dir_x: -1, dir_y: -1, touch: static_body.name}, this);
+            send('ball', {x: self.x, y: self.y, dir_x: -1, dir_y: -1, touch: static_body.name}, self);
             break;
     }
 }
@@ -179,7 +180,7 @@ function gPal(self, static_body) {
 function score(goal) {
     if (goal.owner != null)
     {
-        send('score_one', { owner: goal.owner }, this);
+        send('score_one', { owner: goal.owner }, self);
     }
 }
 
@@ -207,7 +208,7 @@ function bounce(self, static_body) {
             break;
     }
 
-    send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir, touch: static_body.name}, this);
+    send('ball', {x: self.x, y: self.y, dir_x: x_dir, dir_y: y_dir, touch: static_body.name}, self);
 }
 
 function bounceCircle(self, other) {
@@ -233,7 +234,7 @@ function bounceCircle(self, other) {
     return {x_dir: x_dir, y_dir: y_dir};
 }
 
-function send(req, obj, this_obj) {
+function send(req, obj, self) {
 	
 	let cmd = {
 		req: req,
@@ -242,11 +243,11 @@ function send(req, obj, this_obj) {
 
 	if (req == 'ball')
 	{
-		console.log(this_obj);
-		/*if	(self.synced)
-		{*/	
+		if	(self.synced)
+		{	
+			self.synced = false;
 			eventManager.emit('send', cmd);
-		//}
+		}
 	}
 	else
 	{
