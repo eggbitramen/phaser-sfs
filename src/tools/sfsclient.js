@@ -9,6 +9,7 @@ let sfs_config = {
     
     zone: 'BasicExamples',
     
+	
     host: '127.0.0.1',
     port: 8090,
     useSSL: false,
@@ -18,6 +19,7 @@ let sfs_config = {
     port: 8443,
     useSSL: true,
 	*/
+	
 
     debug: false
 };
@@ -93,7 +95,8 @@ export default class SFSClient {
                 game_state: 1
             });
         }
-        else{
+        
+		else{
             sessionStorage.setItem("dewa.uid", "UserTest" + Math.floor(Math.random() * 50));
             sessionStorage.setItem("dewa.game_id", 11);
             sessionStorage.setItem("dewa.website_id", 1);

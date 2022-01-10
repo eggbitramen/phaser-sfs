@@ -1,10 +1,6 @@
 import eventManager from '../tools/eventmanager';
 import GameManager from '../tools/gamemanager';
 
-const SPEED = 40;
-const JUMP_STR = 100;
-const MASS_GRAVITY = 5000;
-
 export default class Agent extends Phaser.GameObjects.Container
 {
     constructor(scene, x, y, mirrored, player, kick_dir)
@@ -39,25 +35,11 @@ export default class Agent extends Phaser.GameObjects.Container
             this.add(this.marker);
         }
 
-        this.setSize(110, 110);
-        this.scene.physics.world.enable(this);
-        this.body.setCircle(55);
-
-        this.scene.physics.add.collider(this.scene.solidGroup, this);
-        eventManager.emit('register_overlap', this);
-        //this.scene.physics.add.overlap(this, this.scene.overlap_list, overlap, null, this);
-
-        this.body.setGravityY(MASS_GRAVITY);
-
         this.name = player.name;
         this.nickname = player.nickname;
 
         this.dir = "";
         this.act = "";
-
-        this.kick_dir = kick_dir;
-
-        this.overlaps = [];
 
         // Tweens
         this.tweens = {};
@@ -122,6 +104,8 @@ export default class Agent extends Phaser.GameObjects.Container
     update(time, delta)
     {
         //  movement
+
+		/*
         switch (this.dir) {
             case 'right':
                 this.body.velocity.x = SPEED * delta;
@@ -154,23 +138,8 @@ export default class Agent extends Phaser.GameObjects.Container
                 this.tweens.lo.play(true);
                 break;
         }
-        this.act = "";
-
-        let overlap_list = this.scene.overlap_list.getChildren();
-        for (const i in overlap_list) {
-            if (overlap_list[i] != this) {
-                if (this.scene.physics.overlap(this, overlap_list[i]) == false) {
-                    let ioverlap = this.overlaps.indexOf(overlap_list[i].name);
-                    if (ioverlap != -1) {
-                        
-                        this.overlaps.splice(ioverlap, 1);   //  on overlap end
-                    }
-                }
-            }
-        }
-
-        this.scene.physics.overlap(this, this.scene.overlap_list, overlap, null, this); //  test new this.overlaps
-        
+		*/
+        this.act = "";        
     }
 
     rotateHeadTo(dest)
@@ -193,20 +162,6 @@ export default class Agent extends Phaser.GameObjects.Container
         this.dir = 'idle';
         this.act = '';
         this.setPosition(this.init_x, this.init_y);
-    }
-}
-
-function spread(self) {
-    eventManager.emit('spread', self);
-}
-
-function overlap(self, other) {
-    if (!self.overlaps.includes(other.name)) {   // on overlap start
-        self.overlaps.push(other.name);
-        
-       if (other.name == 'ball') {
-           other.interact(self);
-       }
     }
 }
 

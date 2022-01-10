@@ -35,10 +35,9 @@ export default class GamePlay extends Phaser.Scene
         entity_cont = this.add.container(0, 0);
         foreground_cont = this.add.container(0, 0);
 
-        this.overlap_list = this.physics.add.group();
         
         //events
-        eventManager.on('register_overlap', registerOverlap, this);
+      
         eventManager.on('rend_score', renderScore, this);
         eventManager.once('begin_game', beginGame, this);
         eventManager.on('reset_layout', resetLayout, this);
@@ -46,13 +45,17 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('end_game', endGame, this);
         eventManager.on('winner', showWinner, this);
 
+		this.input.on('pointerdown', function (pointer) {
+			console.log(pointer.x + " : " + pointer.y);
+		});
+		
         this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             // kill me, empty score
             endGame();
         }, this);
 
         this.events.once(Phaser.Scenes.SHUTDOWN, () => {
-            eventManager.off('register_overlap', registerOverlap, this);
+         
             eventManager.off('rend_score', renderScore, this);
             eventManager.off('reset_layout', resetLayout, this);
             eventManager.off('update_timer', updateTimer, this);
@@ -74,7 +77,9 @@ export default class GamePlay extends Phaser.Scene
         let field = this.add.image(0, tribune.y + tribune.height, 'field').setOrigin(0, 0);
         let dirt = this.add.image(0, field.y + field.height, 'dirt').setOrigin(0, 0);
         let light = this.add.image(0, 0, 'stadium_light').setOrigin(0, 0);
-        
+       
+		console.log(field.y + field.height / 2);
+
         let goal_backs = [];
         goal_backs[0] = this.add.image(0, field.y + field.height * 3 / 5, 'goal_back').setOrigin(0, 1);
         goal_backs[1] = this.add.image(field.width, field.y + field.height * 3 / 5, 'goal_back').setOrigin(1, 1).setFlipX(true);
@@ -104,15 +109,7 @@ export default class GamePlay extends Phaser.Scene
             .setPosition(goal_collider[1].x - goal_collider[1].width * 3/2, goal_collider[1].y - goal_collider[1].height);
         goal_top[1].name = 'solid_right';
 
-        eventManager.emit('register_overlap', goal_collider[0]);
-        eventManager.emit('register_overlap', goal_collider[1]);
-        eventManager.emit('register_overlap', goal_top[0]);
-        eventManager.emit('register_overlap', goal_top[1]);
-        
-        goal_top[0].body.setCircle(25);
-        goal_top[1].body.setCircle(25);
-
-        //  scoreboard components
+		//  scoreboard components
         let scoreboard_cont = this.add.container();
         let scoreboard = this.add.image(0, 0, 'ui-scoreboard');
         
@@ -177,10 +174,6 @@ export default class GamePlay extends Phaser.Scene
         solids[2].name = 'rect_left';
         solids[3] = this.add.container(field.width + 50, this.game.height / 2).setSize(100, this.game.height);
         solids[3].name = 'rect_right';
-        
-        this.solidGroup = this.physics.add.staticGroup(solids);
-        //this.solidGroup = this.physics.add.staticGroup(goal_collider);
-
         //  moving actors
         this.p1 = new Agent(this, field.width / 4, field.y + field.height * 4 / 10, false, gm.getAllPlayers()[0], 1);
         this.p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1], -1);
@@ -207,11 +200,6 @@ export default class GamePlay extends Phaser.Scene
 
 function updateTimer(time_in_second) {
 	this.txt_timer.setText(time_in_second);
-}
-
-function registerOverlap(object) {
-    this.overlap_list.add(object);
-    this.physics.add.overlap(object, this.overlap_list);
 }
 
 function renderScore(params) {

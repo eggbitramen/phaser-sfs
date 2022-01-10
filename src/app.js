@@ -13,12 +13,18 @@ var game_config = {
     type: Phaser.AUTO,
     width: 1280,
     height: 720,
-    physics: {
+    /*
+	physics: {
         default: 'arcade',
         arcade: {
             debug: false
         }
     },
+	*/
+	fps: {
+		target: 60,
+		forceSetTimeOut: true
+	},
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
