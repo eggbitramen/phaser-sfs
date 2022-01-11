@@ -17,11 +17,17 @@ export default class Ball extends Phaser.GameObjects.Sprite
 		this.vx = 0;
 		this.vy = 0;
 
+		this.enabled = false;
+
         this.setScale(1.3);
         this.setOrigin(0.5, 0.5);
+		console.log("diameter : " + this.height / 2);
 
 		//events
         eventManager.on('set_ball', this.setBall, this);
+		eventManager.once('begin_game', () => {
+			this.enabled = true;
+		});
         this.scene.events.once(Phaser.Scenes.SHUTDOWN, () => {
             eventManager.off('set_ball', this.setBall, this);
         });
@@ -37,11 +43,13 @@ export default class Ball extends Phaser.GameObjects.Sprite
     update(time, _delta)
     {
         delta = _delta / 1000;
+		if (this.enabled)
+		{
+			this.rotation += this.vx * delta;
 
-        /*this.rotation += 0.00001 * this.body.velocity.x * _delta;*/
-
-		this.setPosition(this.x + (this.vx * delta), this.y + ((this.vy + g) * delta))
-
+			this.vy = this.vy + g;
+			this.setPosition(this.x + (this.vx * delta), this.y + (this.vy * delta));
+		}
     }
 
     setBall(params) {

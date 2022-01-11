@@ -22,7 +22,7 @@ var game_config = {
     },
 	*/
 	fps: {
-		target: 60,
+		target: 30,
 		forceSetTimeOut: true
 	},
     scale: {

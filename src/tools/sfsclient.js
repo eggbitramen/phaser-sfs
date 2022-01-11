@@ -8,12 +8,10 @@ let gm;
 let sfs_config = {
     
     zone: 'BasicExamples',
-    
-	
+    	
     host: '127.0.0.1',
     port: 8090,
     useSSL: false,
-    
     /*
 	host: 'staireight.com',
     port: 8443,
@@ -319,7 +317,6 @@ function onExtensionResponse(event)
             break;
         case 'ball':
             eventManager.emit('set_ball', event.params);
-            console.log(event.params.getUtfString('touch'));
             break;
         case 'rend_score':
             eventManager.emit('rend_score', event.params);
