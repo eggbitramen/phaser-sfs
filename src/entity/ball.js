@@ -45,10 +45,17 @@ export default class Ball extends Phaser.GameObjects.Sprite
         delta = _delta / 1000;
 		if (this.enabled)
 		{
-			this.rotation += this.vx * delta;
+			this.rotation += this.vx * delta / 100;
 
 			this.vy = this.vy + g;
-			this.setPosition(this.x + (this.vx * delta), this.y + (this.vy * delta));
+
+			let cx = this.x + (this.vx * delta);
+			let cy = this.y + (this.vy * delta);
+
+			if ((cx - this.height/2 > 0 && cx + this.height/2 < 1280) && (cy - this.height/2 > 0 && cy + this.height/2 < 490))
+			{
+				this.setPosition(cx, cy);
+			}
 		}
     }
 

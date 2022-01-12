@@ -179,7 +179,8 @@ export default class GamePlay extends Phaser.Scene
         this.p2 = new Agent(this, 3 / 4 * field.width, field.y + field.height * 4 / 10, true, gm.getAllPlayers()[1], -1);
 
         //  ball
-        this.ball = new Ball(this, 1280 / 2, 720 / 2);
+        this.ball = new Ball(this, 1280 / 2, 490 / 2);
+		this.ball.y = 490 - this.ball.height / 2;
 
         entities = [this.p1, this.p2, this.ball];
 
