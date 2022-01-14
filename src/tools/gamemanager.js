@@ -15,17 +15,18 @@ export default class GameManager {
 
     initPlayers(players_obj)
     {
-        players = [];
+        players = new Array(2);
         let player_keys = players_obj.getKeysArray();
         for (const key in player_keys) {
             let player_obj = players_obj.getSFSObject(player_keys[key]);
             let player = {
+				index: player_obj.getInt('index'),
                 name: player_obj.getUtfString('name'),
                 nickname: player_obj.getUtfString('nickname'),
                 avatar_url: player_obj.getUtfString('avatar'),
                 score: 0
             };
-            players.push(player);
+            players[player.index] = player;
         }
     }
 

@@ -211,7 +211,7 @@ function renderScore(params) {
 
     scores.forEach( function(score_txt) {
         // console.log(score_txt);
-        if (score_txt.owner == params.getUtfString('owner')) {
+        if (score_txt.owner == params.getUtfString('name')) {
             score_txt.setText(String(params.getDouble('new_score')));
         }
     });

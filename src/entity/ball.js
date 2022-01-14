@@ -1,7 +1,8 @@
 import eventManager from '../tools/eventmanager';
 
 let delta;
-const g = 10;
+const g = 100;
+const f = 10;
 
 export default class Ball extends Phaser.GameObjects.Sprite
 {
@@ -45,17 +46,32 @@ export default class Ball extends Phaser.GameObjects.Sprite
         delta = _delta / 1000;
 		if (this.enabled)
 		{
-			this.rotation += this.vx * delta / 100;
+			this.rotation += this.vx * delta / 50;
 
-			this.vy = this.vy + g;
+			let cx = this.x + this.vx * delta;
+			let cy = this.y + (this.vy + g) * delta;
 
-			let cx = this.x + (this.vx * delta);
-			let cy = this.y + (this.vy * delta);
+			if (cx - this.height/2 < 0)
+				cx = this.height/2;
+			else if (cx + this.height/2 > 1280)
+				cx = 1280 - this.height/2;
 
-			if ((cx - this.height/2 > 0 && cx + this.height/2 < 1280) && (cy - this.height/2 > 0 && cy + this.height/2 < 490))
+			if (cy - this.height/2 < 0)
 			{
-				this.setPosition(cx, cy);
+				cy = this.height/2;
+				this.vy += g;
 			}
+			else if (cy + this.height/2 >= 490)
+			{
+				this.vy = 0;	
+				cy = 490 - this.height/2;
+			}
+			else
+			{
+				this.vy += g;
+			}
+
+			this.setPosition(cx, cy);
 		}
     }
 

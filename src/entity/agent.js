@@ -11,7 +11,9 @@ export default class Agent extends Phaser.GameObjects.Container
         this.init_x = this.x;
         this.init_y = this.y;
 
-        this.gm = GameManager.getInstance();
+		this.g = 100;
+
+		this.gm = GameManager.getInstance();
 
         let color = mirrored ? 'red' : 'green';
         let offset = mirrored ? 1 : -1;
@@ -37,6 +39,10 @@ export default class Agent extends Phaser.GameObjects.Container
 
         this.name = player.name;
         this.nickname = player.nickname;
+
+		this.vx = 0;
+		this.vy = 0;
+		this.r = 60;
 
         this.dir = "";
         this.act = "";
@@ -92,54 +98,53 @@ export default class Agent extends Phaser.GameObjects.Container
     {
         if (params.getUtfString('name') == this.name)
         {
-            this.x = params.getDouble('x');
-            this.y = params.getDouble('y');
+			this.vx = params.getDouble('vx');
+			this.vy = params.getDouble('vy');
 
-            this.dir = params.getUtfString('dir') ? params.getUtfString('dir') : this.dir;
-            this.act = params.getUtfString('act') ? params.getUtfString('act') : this.act;
-            
+			this.setPosition(params.getDouble('x'), params.getDouble('y'));
+
+			if (params.getUtfString('act'))
+				this.act = params.getUtfString('act');
         }
     }
 
-    update(time, delta)
+    update(time, _delta)
     {
-        //  movement
-
-		/*
-        switch (this.dir) {
-            case 'right':
-                this.body.velocity.x = SPEED * delta;
-                this.rotateHeadTo(-10);
-                break;
-            case 'left':
-                this.body.velocity.x = -SPEED * delta;
-                this.rotateHeadTo(10);
-                break;
-            case 'idle':
-                this.body.velocity.x = 0;
-                this.rotateHeadTo(0);
-                break;
-            default:        //  idle
-                this.body.velocity.x = 0;
-                break;
-        }
+		let delta = _delta / 1000; 
 
         switch (this.act) {
             case 'jump':
-                this.body.velocity.y = -JUMP_STR * delta;
                 this.tweens.jump.play(true);
                 break;
             case 'hi':
-                if (this.name == this.gm.getProperty('user_id')) spread(this);
-                this.tweens.hi.play(true);
+				this.tweens.hi.play(true);
                 break;
             case 'lo':
-                if (this.name == this.gm.getProperty('user_id')) spread(this);
                 this.tweens.lo.play(true);
                 break;
         }
-		*/
-        this.act = "";        
+		
+        this.act = "";
+		
+		let cx = this.x + this.vx * delta;
+		let cy = this.y + (this.vy + this.g) * delta;
+
+		// code for collision check
+		if (cx - this.r < 0)
+			cx = this.r;
+		else if (cx + this.r > 1280)
+			cx = 1280 - this.r;
+
+		if (cy + this.r > 490)
+		{
+			cy = 490 - this.r;
+			this.vy = 0;
+		}
+		else
+			this.vy += this.g;
+
+		this.setPosition(cx, cy);
+
     }
 
     rotateHeadTo(dest)
