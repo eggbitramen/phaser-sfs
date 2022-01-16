@@ -9,7 +9,7 @@ let sfs_config = {
     
     zone: 'BasicExamples',
     	
-    host: '127.0.0.1',
+    host: 'localhost',
     port: 8090,
     useSSL: false,
     /*
@@ -17,7 +17,6 @@ let sfs_config = {
     port: 8443,
     useSSL: true,
 	*/
-	
 
     debug: false
 };

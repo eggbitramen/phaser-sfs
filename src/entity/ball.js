@@ -1,7 +1,7 @@
 import eventManager from '../tools/eventmanager';
 
 let delta;
-const g = 100;
+const g = 150;
 const f = 10;
 
 export default class Ball extends Phaser.GameObjects.Sprite

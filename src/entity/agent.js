@@ -11,7 +11,9 @@ export default class Agent extends Phaser.GameObjects.Container
         this.init_x = this.x;
         this.init_y = this.y;
 
-		this.g = 100;
+		this.kick_dir = kick_dir;
+
+		this.g = 150;
 
 		this.gm = GameManager.getInstance();
 
@@ -48,8 +50,31 @@ export default class Agent extends Phaser.GameObjects.Container
         this.act = "";
 
         // Tweens
+		
+		console.log(this.kick_dir);
+
         this.tweens = {};
-        this.tweens.jump = this.scene.tweens.add({
+
+		this.tweens.right = this.scene.tweens.add({
+            targets: this.head,
+            duration: 100,
+            angle: -20,
+            paused: true
+        });
+		this.tweens.left = this.scene.tweens.add({
+            targets: this.head,
+            duration: 100,
+            angle: 20,
+            paused: true
+        });
+		this.tweens.idle = this.scene.tweens.add({
+            targets: this.head,
+            duration: 100,
+            angle: 0,
+            paused: true
+        });
+
+		this.tweens.jump = this.scene.tweens.add({
             targets: this.shoe,
             duration: 200,
             angle: 20 * this.kick_dir,
@@ -103,6 +128,8 @@ export default class Agent extends Phaser.GameObjects.Container
 
 			this.setPosition(params.getDouble('x'), params.getDouble('y'));
 
+			if (params.getUtfString('dir'))
+				this.dir = params.getUtfString('dir');
 			if (params.getUtfString('act'))
 				this.act = params.getUtfString('act');
         }
@@ -111,6 +138,19 @@ export default class Agent extends Phaser.GameObjects.Container
     update(time, _delta)
     {
 		let delta = _delta / 1000; 
+
+		switch (this.dir) {
+			case 'left':
+				this.tweens.left.play(true);
+				break;
+			case 'right':
+				this.tweens.right.play(true);
+				break;
+			case 'idle':
+				this.head.angle = 0;
+				break;
+		}
+		this.dir = "";
 
         switch (this.act) {
             case 'jump':
@@ -123,7 +163,6 @@ export default class Agent extends Phaser.GameObjects.Container
                 this.tweens.lo.play(true);
                 break;
         }
-		
         this.act = "";
 		
 		let cx = this.x + this.vx * delta;
