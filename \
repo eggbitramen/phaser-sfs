@@ -1,0 +1,936 @@
+var room;
+var users;
+var scheduler;			// scheduler object
+var schedulers = {};	// scheduler instruction holder
+
+var webId;
+var battle_note;
+
+var game_state = 0; //	0 = pre-game; 1 = countdown; 2 = post-game;
+var players = {};
+var game_winner;
+var countdown = 5 + 1;
+var bots = 0;
+
+/*------------ game specific vars -----------*/
+var game_timer = 30;
+var ball = {};
+var agents = [];
+var gbounds = [];
+
+var a_speed = 500;
+	var a_jump = 1200;
+	var game_session = false;
+
+	var rdt = 1000 / 30;
+
+	var field = {
+		width : 1280,
+		height : 490
+	};
+	var g = 150;
+
+	var enable_controll = false;
+	var injury_time = false;
+
+	/*---------- extension constructor ----------*/
+
+	function init() {
+
+		// trace('init game');
+
+		//trace(getParentZone().getUserList());
+
+		room = getParentRoom();
+		scheduler = getApi().newScheduler();
+
+		addEventHandler(SFSEventType.USER_JOIN_ROOM, onUserJoinRoom);
+		addEventHandler(SFSEventType.USER_LEAVE_ROOM, onUserLeaveRoom);
+		addEventHandler(SFSEventType.USER_DISCONNECT, onUserDisconnect);
+		
+		// addRequestHandler("pregame_check", preGameCheck)
+		addRequestHandler("act", setAction);
+		/*
+		addRequestHandler("confirm", syncConfirm);
+		addRequestHandler("ball", setBallAction); 
+		*/
+		addRequestHandler("score_one", scoreOnePoint);
+		addRequestHandler("currency", getCurrency);
+		
+		setRoomVariable("isStarted", false, VariableType.BOOL);
+
+		if (room.getVariable("isBotAllowed").getValue() == 1)
+		{
+			schedulers.spawn_bot = scheduler.schedule(createBots, 5000);
+		}
+
+		/** Game Specific */
+		ball.r = 23; /* jari-jari bola */
+		ball.f = 10;
+		ball.x = field.width / 2;
+		ball.y = field.height - ball.r;
+		ball.vx = 0;
+		ball.vy = -100;	
+	}
+
+	function destroy() {
+		for (var key in schedulers) {
+			if (schedulers.hasOwnProperty(key)) {
+				if (schedulers[key] != null) schedulers[key].cancel(true);
+			}
+		}
+	}
+
+	/*---------- methods ----------------------*/
+
+	function clientLog(value) {
+		var log_msg = new SFSObject();
+		log_msg.putUtfString('msg', "bolamania : " + String(value));
+
+		send('trace', log_msg, users);
+	}
+
+	function sendFlash(key, value, type) {
+		var flashValue = new SFSObject();
+		switch (type) {	//int, string, double, boolean
+			case 'int':
+				flashValue.putInt('value', value);		
+				break;
+			case 'boolean':
+				flashValue.putBool('value', value);		
+				break;
+			case 'double':
+				flashValue.putDouble('value', value);		
+				break;
+			case 'string':
+				flashValue.putUtfString('value', value);		
+				break;
+			default:
+				// trace("Error : sendFlash type not available");
+				break;
+		}
+
+		send(key, flashValue, users);
+	}
+
+	function setRoomVariable(name, value, type) {
+		var new_var = new SFSRoomVariable(name, value, type);
+		room.setVariable(new_var);
+	}
+
+	function updateUsers() {
+		users = room.getUserList();
+		players.ready = [];
+		var player_names = [];
+		for (var user in users) {
+			players.ready.push(users[user]);
+			player_names.push(users[user].getName());
+		}
+		
+		sendFlash('ready_msg', players.ready.length + " / " + room.getMinPlayersToStartGame(), 'string');
+
+		if (room.isActive() && checkPlayersRequirement(players.ready) != null)
+		{
+			room.setActive(false);
+			setRoomVariable("isStarted", true, VariableType.BOOL);
+			schedulers.one_sec = scheduler.scheduleAtFixedRate(oneSecond, 1000);
+			
+			// Start Game
+			game_state = 1;
+			var score_init = new SFSUserVariable('score', 0, VariableType.INT);
+			for (var iuser in users) {
+				
+				var _r = 60;
+
+				var agent = {
+					name: users[iuser].getName(),
+					r : _r,
+					x : field.width / 4 + iuser * (field.width / 2),
+					y : field.height - _r,
+					vx : 0,
+					vy : 0,
+					reach : _r + 40,
+					dir : 'idle',
+					act : '',
+					is_npc : false
+				};
+				agent.ix = agent.x;
+				agent.iy = agent.y;
+
+				if (iuser == 0)
+					agent.side = 1;
+				if (iuser == 1)
+					agent.side = -1;
+
+				if (users[iuser].isNpc())
+					agent.is_npc = true;
+
+				var gbound = {
+					x : (field.width/2 - agent.side * field.width/2) - (120 * iuser),
+					y : 490 - 240,
+					width : 120,
+					height : 240
+				}
+			
+				/*
+				var _w = gbound.x + gbound.width;
+				var _h = gbound.y + gbound.height;
+				clientLog(gbound.x + ', ' + gbound.y + ', ' + _w + ', ' + _h);
+				*/	
+
+				agents.push(agent);
+				gbounds.push(gbound);
+				users[iuser].setVariable(score_init);
+			}
+
+			/*	Swap Goal_id	*/
+			var tgbound = gbounds[0];
+			gbounds[0] = gbounds[1];
+			gbounds[1] = tgbound;
+			tgbound = null;
+
+			send('ready', checkPlayersRequirement(players.ready), users);
+
+			var params = {
+				room_id: room.getVariable("roomid").getValue(), 
+				players: player_names,
+				website_id: room.getVariable("website_id").getValue()
+			};
+			
+			getApi().newHttpPostRequest("https://staireight.com/api/createBattle", params, httpCreateResponse).execute();
+		}
+	}
+
+	function checkPlayersRequirement(players_ready) {
+		if (players_ready.length < room.getMinPlayersToStartGame()) {
+			return null;
+		}
+		else
+		{
+			var players_obj = new SFSObject();
+			for (var player in players_ready) {
+				var player_obj = new SFSObject();
+				player_obj.putInt('index', player);
+				player_obj.putUtfString('name', players_ready[player].getName());
+				player_obj.putUtfString('nickname', players_ready[player].getVariable('nickname').getValue());
+				if (players_ready[player].getVariable('avatar') != null) 
+					player_obj.putUtfString('avatar', players_ready[player].getVariable('avatar').getValue())
+				else
+					player_obj.putUtfString('avatar', 'none');
+
+				players_obj.putSFSObject(players_ready[player].getName(), player_obj);
+			}
+
+			return players_obj;
+		}
+	}
+
+	function setAction(params, sender) {
+		if (enable_controll) 
+		{
+			for (var a in agents)
+			{
+				var agent = agents[a];
+				if (sender.getName() == agent.name)
+				{
+					if (params.getUtfString('dir'))
+					{
+						agent.dir = params.getUtfString('dir');
+					
+						switch(agent.dir)
+						{
+							case 'idle':
+								agent.vx = 0;
+								break;
+							case 'right':
+								agent.vx = a_speed;
+								break;
+							case 'left':
+								agent.vx = -a_speed;
+								break;
+						}
+						sendAct('dir', agent);
+					}
+
+					if (params.getUtfString('act'))
+						agent.act = params.getUtfString('act');
+				}
+			}
+		}
+	}
+
+	function setBall() 
+	{	
+		var ball_act = new SFSObject();
+		ball_act.putDouble('x', ball.x);
+		ball_act.putDouble('y', ball.y);
+		ball_act.putDouble('vx', ball.vx);
+		ball_act.putDouble('vy', ball.vy);
+		send('ball', ball_act, users);
+	}
+
+	function sendAct(_act, agent)
+	{
+		var act = new SFSObject();
+
+		act.putUtfString('name', agent.name);
+		if (_act == 'dir')
+			act.putUtfString('dir', agent.dir);
+		if (_act == 'act')
+			act.putUtfString('act', agent.act);
+		
+		act.putDouble('x', agent.x);
+		act.putDouble('y', agent.y);
+		act.putDouble('vx', agent.vx);
+		act.putDouble('vy', agent.vy);
+		send('act', act, users);
+
+		if (_act == 'act')
+			trace(act.getUtfString('act'));
+	}
+
+	function getDistance(a, b)
+	{
+		var dx = a.x - b.x;
+		var dy = a.y - b.y;
+
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	function syncConfirm(params, sender)
+	{
+		var write = true;
+		for (var i in sync_flag)
+		{
+			if (sync_flag[i] == sender.getName())
+				write = false;
+		}
+
+		if (write)
+		{
+			sync_flag.push(sender.getName());
+			if (players.ready.length - 1 == sync_flag.length)
+			{
+				sync_flag = [];
+				ball.synced = true;
+			}
+		}
+	}
+
+	function scoreOnePoint(goal_id) {
+		if (game_session && game_state == 1)
+		{
+			game_session = false;
+			var user = getApi().getUserByName(getParentZone(), agents[goal_id].name);
+			var old_score = user.getVariable('score').getValue();
+			var new_score = new SFSUserVariable('score', old_score + 1, VariableType.INT);
+			user.setVariable(new_score);
+
+			var goal_info = new SFSObject();
+			goal_info.putUtfString('name', agents[goal_id].name);
+			goal_info.putDouble('new_score', new_score.getValue());
+
+			send('rend_score', goal_info, users);
+
+			if (game_timer <= 0 && injury_time) {
+				game_session = false;
+				countScore();
+				scheduler.schedule(endGame, 3000);	
+			}
+			else
+			{
+				scheduler.schedule(resetPlayState, 1000);	//	reset play state
+			}
+			// trace('GOAL');
+		}
+	}
+
+	function submitScore() {
+		for (var u in users) {
+			var user = users[u];
+
+			var params;
+			if (!user.isNpc())
+			{
+				params = {
+					battle_note: battle_note,
+					user_id: user.getName(),
+					username: user.getVariable("nickname").getValue(),
+					score: user.getVariable('score').getValue(),
+					website_id: user.getVariable("website_id").getValue()
+				};
+
+				getApi().newHttpPostRequest("https://staireight.com/api/addScore", params, httpScoreResponse).execute();
+			}
+		};
+	}
+
+	function getCurrency(params, sender) {
+		var key = {
+			uid: sender.getName(),
+			session_token: sender.getVariable("session_token").getValue(),
+			website_id: sender.getVariable("website_id").getValue()
+		};
+		getApi().newHttpPostRequest("https://staireight.com/api/authData", key, httpGetCurrencyResponse).execute();
+	}
+
+	function clearBots() {
+
+		users = room.getUserList();
+		
+		var proceed = false;
+		if (game_state != 1)
+		{
+			proceed = true;
+		}
+		else
+		{
+			proceed = true;
+			for (var u in users) {
+				if (!users[u].isNpc())
+					proceed = false;
+			}
+		}
+
+		if (proceed)
+		{
+			for (var u in users) {
+				if (users[u].isNpc())
+					getApi().disconnectUser(users[u]);
+			}
+		}
+	}
+
+	/*---------- schedulers -------------------*/
+
+	function createBots() {
+		
+		var bot_count = room.getMinPlayersToStartGame() - players.ready.length;
+		var params = {
+			results: bot_count,
+			nat: "us,au",
+			noinfo: "",
+			inc: "name"
+		}
+
+		bots += 1;
+
+		getApi().newHttpGetRequest("https://randomuser.me/api/", params, httpGetBotNameResponse).execute();
+	}
+
+	function oneSecond() {
+		// trace('ticking');
+		if ( countdown > 0 )
+		{
+			countdown -= 1;
+			sendFlash('countdown', countdown.toString(), 'string');
+			if (countdown == 0) {
+				scheduler.schedule(beginGame, 3000);
+			}
+			// trace('countdown');
+		}
+
+		if (game_session && game_timer > 0) {
+			game_timer -= 1;
+			sendFlash('timer', game_timer.toString(), 'string');
+			if (game_timer <= 0)
+			{
+
+			//	quick compare
+				var quick_score = [];
+				for (var u in users) {
+					quick_score.push(users[u].getVariable('score').getValue());
+				}
+				trace(quick_score);
+
+				if (quick_score[0] == quick_score[1]) {
+					injury_time = true;
+					trace('injury');
+				}
+				else
+				{
+					game_session = false;
+					countScore();
+					scheduler.schedule(endGame, 3000);
+					trace('end');
+				}
+				
+			}
+		}
+	}
+
+	function beginGame() {
+		// trace('BEGIN');
+		enable_controll = true;
+		game_session = true;
+
+		setBall();
+		schedulers.update = scheduler.scheduleAtFixedRate(update, rdt);
+		
+		/*	initiate bot movement */
+		for (var b in players.ready)
+		{
+			if (players.ready[b].isNpc())
+			{
+				var _randt = Math.floor(Math.random() * (1500 - 250 + 1)) + 250;
+				schedulers.bot_act = scheduler.schedule(botAct, _randt);
+			}
+		}
+	}
+
+	function resetPlayState() {
+		ball.x = field.width / 2;
+		ball.y = field.height - ball.r;
+		ball.vx = 0;
+		ball.vy = 0;
+		for (var a in agents)
+		{
+			var agent = agents[a];
+			agent.x = agent.ix;
+			agent.y = agent.iy;
+		}
+		game_session = true;
+		ball.touch = "none";
+		send('reset', null, users);
+	}
+
+	function update()
+	{
+		var dt = rdt / 1000;		/* dt = 33.333 */
+
+		/*		Ball Update		*/
+
+		// clientLog(ball.vx + ' : ' + ball.vy);
+
+		var cbx = ball.x + (ball.vx) * dt;	
+		var cby = ball.y + (ball.vy + g) * dt;
+
+		if (cbx - ball.r < 0)
+		{
+			ball.vx = Math.abs(ball.vx) * 1;
+			cbx = ball.x + (ball.vx) * dt;
+			setBall();
+		}
+		else if (cbx + ball.r > field.width)
+		{
+			ball.vx = Math.abs(ball.vx) * -1;
+			cbx = ball.x + (ball.vx) * dt;
+			setBall();
+		}
+
+		if (cby - ball.r < 0)
+		{
+			ball.vy = Math.abs(ball.vy) * 1;
+			cby = ball.y + (ball.vy + g) * dt;
+			setBall();
+			ball.vy += g;
+		}
+		else if (cby + ball.r >= field.height)
+		{
+			if (ball.vy > 10)
+			{
+				ball.vy = (Math.abs(ball.vy) * 70 / 100) * -1;
+				cby = ball.y + (ball.vy + g) * dt;
+			}
+			else
+			{
+				ball.vy = 0;
+				cby = field.height - ball.r;
+				ball.vx = ball.vx * 75 / 100;
+			}
+			setBall();
+
+		}
+		else
+		{
+			ball.vy += g;
+		}
+
+		ball.x = cbx;
+		ball.y = cby;
+		
+		// clientLog(ball.y);
+
+		/*		Agents Update	*/
+		for (var a in agents)
+		{
+			var agent = agents[a];
+
+			var _reach = agent.r;
+			var _pow_x = 0;
+			var _pow_y = 0;
+
+			if (agent.is_npc == true)
+			{
+				_reach = agent.reach;
+				_pow_x = 900 * agent.side;
+				_pow_y = 1500 * -1;
+
+				if (agent.act == 'jump')
+				{
+					agent.vy = -a_jump;
+					sendAct('act', agent);
+					agent.act = '';
+				}
+			}
+			else
+			{
+				if (agent.act != '')
+				{
+					switch(agent.act)
+					{
+						case 'jump':
+							agent.vy = -a_jump;
+							break;
+						case 'hi':
+							_reach = agent.reach;
+							_pow_x = 900 * agent.side;
+							_pow_y = 1500 * -1;
+							break;
+						case 'lo':
+							_reach = agent.reach;
+							_pow_x = 1500 * agent.side;
+							_pow_y = 800 * -1;
+							break;
+					}
+
+					sendAct('act', agent);
+
+					agent.act = '';
+				}
+			}
+
+			if (getDistance(agent, ball) <= _reach + ball.r)
+			{
+				var dx = ball.x - agent.x;
+				var dy = ball.y - agent.y;
+				var deacc = 70 / 100;
+				
+				var min_str = 600;
+
+				/*	angkat	*/
+				if(Math.abs(ball.vy) < 10 && Math.abs(ball.vy) <= 100) //	ball is stoped on ground
+				{
+					ball.vx = min_str * (dx / Math.abs(dx));
+					ball.vy = min_str * -1;
+				}
+				else
+				{
+					if (Math.abs(dx) > Math.abs(dy))
+					{
+						ball.vx = Math.abs(ball.vx) * (dx / Math.abs(dx)) * deacc;
+					}
+					else if (Math.abs(dy) > Math.abs(dx))
+					{
+						ball.vy = Math.abs(ball.vy) * (dy / Math.abs(dy)) * deacc;
+					}
+				}
+
+				if (_pow_x != 0 || _pow_y != 0)
+				{
+					ball.vx = _pow_x;
+					ball.vy = _pow_y;
+					ball.x = agent.x + (agent.r + ball.r) * agent.side;
+				}
+
+				clientLog(ball.vx + ' : ' + ball.vy);
+				setBall();
+
+				if (agent.is_npc == true)
+				{
+					agent.act = 'hi';
+					sendAct('act', agent);
+					agent.act = '';
+				}
+			}
+
+			/*	goal	*/
+			var gbound = gbounds[a];
+			if ((ball.x > gbound.x && ball.x < gbound.x + gbound.width) && (ball.y > gbound.y && ball.y < gbound.y + gbound.height))
+			{
+				scoreOnePoint(a);
+			}
+
+			var cx = agent.x + agent.vx * dt;
+			var cy = agent.y + (agent.vy + g) * dt;
+
+			if (cx - agent.r < 0)
+				cx = agent.r;
+			else if (cx + agent.r > field.width)
+				cx = field.width - agent.r; 
+			
+			if (cy + agent.r >= field.height)
+			{
+				var isSend = false;
+				if (agent.vy != 0)
+					isSend = true;
+				agent.vy = 0;
+				cy = field.height - agent.r;
+				
+				if (isSend)
+					sendAct('dir', agent);
+			}
+			else
+			{
+				agent.vy += g;
+			}
+
+			agent.x = cx;
+			agent.y = cy;
+		}
+
+	}
+
+	function botAct()
+	{
+		var sender = null;
+		var agent = null;
+		for (var a in agents)
+		{
+			if (agents[a].is_npc == true)
+			{
+				sender = getApi().getUserByName(getParentZone(), agents[a].name);
+				agent = agents[a];
+			}
+		}
+
+		var _rand_act = Array(2);
+
+		var dir_list = ['left', 'right', 'idle'];
+		for (var d in dir_list)
+		{
+			if (dir_list[d] == agent.dir)
+				dir_list.splice(d, 1);
+		}
+
+		if (Math.random() > 0.4)
+	{
+		_rand_act[0] = 'dir';
+		_rand_act[1] = dir_list[Math.floor(Math.random() * dir_list.length)];
+		if (agent.x < agent.ix - 200)
+			_rand_act[1] = 'right';
+		else if (agent.x > agent.ix + 200)
+			_rand_act[1] = 'left';
+	}
+	else
+	{
+		_rand_act[0] = 'act';
+		_rand_act[1] = 'jump';
+	}
+
+	var params = new SFSObject();
+	
+	params.putUtfString(_rand_act[0], _rand_act[1]);
+
+	setAction(params, sender)
+
+	var _randt = Math.floor(Math.random() * (700 - 250 + 1)) + 250;
+	schedulers.bot_act = scheduler.schedule(botAct, _randt);
+}
+
+function countScore() {
+
+	var score_list = [];
+	var score_obj = new SFSObject();
+
+	for (var user in users) {
+		var mult_score = users[user].getVariable('score').getValue() * 1000;
+		var new_score = new SFSUserVariable('score', mult_score, VariableType.INT);
+		users[user].setVariable(new_score);
+
+		score_list.push([users[user].getName(), mult_score]);
+		score_obj.putInt(users[user].getName(), mult_score);
+	}
+
+	score_list.sort(function(a, b) {
+		return b[1] - a[1];
+	});
+
+	game_winner = getApi().getUserByName(getParentZone(), score_list[0][0]);
+	var winner_name = score_list[0][0];
+	score_obj.putUtfString('winner', winner_name);
+	send('winner', score_obj, users);	//	Move to after
+
+	// http update battle
+	var params;
+	var httpUpdateReq;
+
+    if (!game_winner.isNpc())
+    {
+		trace("Bolamania: " + battle_note + " " + winner_name + " " + game_winner.getVariable("session_token").getValue() + " " + game_winner.getVariable("website_id").getValue());
+
+        params = {
+            battle_note: battle_note, 
+            winners: winner_name,
+            session_token: game_winner.getVariable("session_token").getValue(),
+            website_id: game_winner.getVariable("website_id").getValue()
+        };
+		httpUpdateReq = getApi().newHttpPostRequest("https://staireight.com/api/updateBattle", params, httpUpdateResponse);
+    }
+    else
+    {
+        params = {
+            battle_note: battle_note, 
+            winners: winner_name
+        };
+        httpUpdateReq = getApi().newHttpPostRequest("https://staireight.com/api/updateBattleBot", params, httpUpdateResponse);
+    }
+	httpUpdateReq.execute();
+	
+	trace("Bolamania: count score complete");
+}
+
+function endGame() {
+	game_state = 2;
+	send('end', null, users);
+}
+
+/*---------- extension callbacks ----------*/
+
+function onUserJoinRoom(event) {
+    updateUsers();
+}
+
+function onUserLeaveRoom(event) {
+	clearBots();
+    updateUsers();
+}
+
+function onUserDisconnect(event) {
+    var disconnected = event.getParameter(SFSEventParam.USER);
+
+    if (game_state = 1)
+    {
+        //discardPlayer(null, disconnected);
+    } else {
+        updateUsers()
+    }
+
+    getApi().logout(disconnected);
+
+    clearBots();
+}
+
+/*---------- http callbacks ---------------*/
+
+function httpCreateResponse(result) {
+    if (result.error)
+    {
+        trace("bolamania: Create battle request failed " + result.error);
+    }
+    else
+    {
+		battle_note = JSON.parse(result.html).data;
+		
+		for (var p in players.ready) {
+			var player = players.ready[p];
+			if (!player.isNpc())
+			{
+				var params = {
+					uid: player.getName(),
+					session_token: player.getVariable("session_token").getValue(),
+					website_id: player.getVariable("website_id").getValue(),
+					battle_note: battle_note
+				};
+				getApi().newHttpPostRequest("https://staireight.com/api/debitCoin", params, httpDebitCoinResponse).execute();
+			}
+		}
+    }
+}
+
+function httpDebitCoinResponse(result) {
+    if (result.error)
+    {
+        trace("bolamania: Debit coin error " + result.error);
+    }
+    else
+    {
+        var res = JSON.parse(result.html);
+        var user_check = getApi().getUserByName(getParentZone(), res.data2);
+        if (res.msg == "failed")
+        {
+			getApi().disconnectUser(user_check);
+			//	need to patch ?
+			//	NO !
+        }
+        else
+        {
+            var check_pass = new SFSUserVariable("check_pass", "pass");
+            user_check.setVariable(check_pass);
+		}
+		
+		trace("bolamania: debit coin complete");
+    }
+}
+
+function httpUpdateResponse(result) {
+    if (result.error)
+    {
+        //trace("dewa-battle: Update battle result failed " + result.error);
+    } else {
+		submitScore();
+    }
+}
+
+function httpScoreResponse(result) {
+    if (result.error)
+    {
+        //trace("dewa-battle: Can not save battle score " + result.error);
+	}
+	else
+	{
+		trace("Bolamania: Submit score success")
+	}
+}
+
+function httpGetCurrencyResponse(result) {
+    if (result.error)
+    {
+        //trace("dewa-battle: Can not fetch user posession " + result.error);
+    }
+    else
+    {
+        if (JSON.parse(result.html).msg == "success")
+        {
+            var user_data = JSON.parse(result.html).data;
+            var user_posession = new SFSObject();
+            user_posession.putInt("coin", user_data.coin);
+            user_posession.putInt("diamond", user_data.diamond);
+            
+            var requester = getApi().getUserByName(getParentZone(), user_data.uid);
+            send("currency", user_posession, requester);
+        }
+    }
+}
+
+function httpGetBotNameResponse(result) {
+
+    if (result.error)
+    {
+        //trace("dewa-battle: Can not get bot name from randomusers.me " + result.error);
+    }
+    else
+    {
+        var data = JSON.parse(result.html);
+
+        for (var i in data.results)
+        {
+            var bot_id = room.getName() + i;
+            if (getApi().getUserByName(getParentZone(), bot_id))
+            {
+                getApi().disconnectUser(getApi().getUserByName(getParentZone(), bot_id));
+                //trace("dewa-battle : disconnect bot");
+            }
+    
+            var pict_url = "https://picsum.photos/id/" + Math.floor(Math.random() * 1000) + "/100/100";
+
+            var bot = getApi().createNPC(bot_id, getParentZone(), true);
+            var bot_nick_name = new SFSUserVariable("nickname", data.results[i].name.first);
+            var bot_avatar = new SFSUserVariable("avatar", pict_url);
+            getApi().setUserVariables(bot, [bot_nick_name, bot_avatar]);
+            getApi().joinRoom(bot, getParentRoom());
+            updateUsers();
+            //trace("dewa-battle : bot " + bot);
+        }
+    }
+}

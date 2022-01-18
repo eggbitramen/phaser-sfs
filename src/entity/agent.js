@@ -169,10 +169,10 @@ export default class Agent extends Phaser.GameObjects.Container
 		let cy = this.y + (this.vy + this.g) * delta;
 
 		// code for collision check
-		if (cx - this.r < 0)
-			cx = this.r;
-		else if (cx + this.r > 1280)
-			cx = 1280 - this.r;
+		if (cx - this.r < 90)
+			cx = 90 + this.r;
+		else if (cx + this.r > 1280 - 90)
+			cx = 1280 - 90 - this.r;
 
 		if (cy + this.r > 490)
 		{
