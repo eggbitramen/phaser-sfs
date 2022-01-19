@@ -24,6 +24,21 @@ export default class Ball extends Phaser.GameObjects.Sprite
         this.setOrigin(0.5, 0.5);
 		console.log("diameter : " + this.height / 2);
 
+		this.command = [];
+
+		console.log(this);
+
+		this.warpto = this.scene.tweens.add({
+			targets: this,
+			x: this.x,
+			y: this.y,
+			duration: 100,
+			paused: true,
+			onComplete: () => {
+				this.runCommand()
+			}
+		});
+
 		//events
         eventManager.on('set_ball', this.setBall, this);
 		eventManager.once('begin_game', () => {
@@ -75,10 +90,49 @@ export default class Ball extends Phaser.GameObjects.Sprite
 		}
     }
 
+	warp(x, y)
+	{
+		this.warpto.updateTo('x', x);
+		this.warpto.updateTo('y', y);
+		this.warpto.play(true);
+	}
+
     setBall(params) {
-        this.setPosition(params.getDouble('x'), params.getDouble('y'));
+		
+		this.setPosition(params.getDouble('x'), params.getDouble('y'));
 		this.vx = params.getDouble('vx');
 		this.vy = params.getDouble('vy');
+
+		/*
+		let move = {
+			x: params.getDouble('x'),
+			y: params.getDouble('y'),
+			vx: params.getDouble('vx'),
+			vy: params.getDouble('vy')
+		}
+
+		this.command.push(move);
+		console.log(this.command.length);
+
+		if (this.command.length == 1)
+			this.warp(move.x, move.y);
+			*/
+	}
+
+	runCommand()
+	{
+		if (this.command.length <= 1)
+		{
+			this.setPosition(this.command[0].x, this.command[0].y);
+			this.vx = this.command[0].vx;
+			this.vy = this.command[0].vy;
+			this.command = [];
+		}
+		else
+		{
+			this.command.shift();
+			this.warp(this.command[0].x, this.command[0].y);
+		}
 	}
 
     reload() {
