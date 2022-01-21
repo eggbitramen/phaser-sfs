@@ -42,6 +42,24 @@ export default class Lobby extends Phaser.Scene {
             .setFontStyle('bold');
         this.find_match_cont.add(this.ready_member_txt);
 
+		/*		Tutorial	*/
+		let text_prop = {
+			wordWrap: {
+				width: this.game.width/2 * 4/5
+			}
+		};
+		this.texts = [
+			"The sky above the port was the color of television, tuned to a dead channel.",
+			"`It's not like I'm using,' Case heard someone say, as he shouldered his way ",
+			"through the crowd around the door of the Chat. `It's like my body's developed",
+			"this massive drug deficiency.' It was a Sprawl voice and a Sprawl joke."
+		];
+		this.tutorial_txt = this.add.text(this.game.width/4, this.game.height * 2/5, this.texts[0], text_prop).setOrigin(0.5, 0.5);
+		this.tutorial_cont.add(this.tutorial_txt);
+
+		let slide_mask = this.add.rectangle(-this.game.width/4, this.game.height * 2/5, this.game.height * 2/3, this.game.height * 2/3, 0x000000).setOrigin(0.5, 0.5);
+		this.tutorial_cont.add(slide_mask);
+
         // add events
         this.find_match_btn.on('pointerup', () => {
             this.find_match_btn.alpha == 1.0
