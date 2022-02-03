@@ -50,9 +50,6 @@ export default class Agent extends Phaser.GameObjects.Container
         this.act = "";
 
         // Tweens
-		
-		console.log(this.kick_dir);
-
         this.tweens = {};
 
 		this.tweens.right = this.scene.tweens.add({

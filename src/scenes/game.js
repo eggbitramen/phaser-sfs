@@ -49,23 +49,19 @@ export default class GamePlay extends Phaser.Scene
 			console.log(pointer.x + " : " + pointer.y);
 		});
 		
-        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
-            // kill me, empty score
-            endGame();
+        this.game.events.once(Phaser.Core.Events.HIDDEN, () => {    
+            endGame(this);
         }, this);
 
-        this.events.once(Phaser.Scenes.SHUTDOWN, () => {
-         
-            eventManager.off('rend_score', renderScore, this);
-            eventManager.off('reset_layout', resetLayout, this);
-            eventManager.off('update_timer', updateTimer, this);
-            eventManager.off('end_game', endGame, this);
-            eventManager.off('winner', showWinner, this);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			eventManager.off('rend_score');
+            eventManager.off('begin_game');
+			eventManager.off('reset_layout');
+            eventManager.off('update_timer');
+            eventManager.off('end_game');
+            eventManager.off('winner');
 
-            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
-                // kill me, empty score
-                endGame();
-            }, this);
+            this.game.events.off(Phaser.Core.Events.HIDDEN);
         });
 
         let players = gm.getAllPlayers();
@@ -151,7 +147,7 @@ export default class GamePlay extends Phaser.Scene
         //  popup components
         this.txt_ready = this.add.image(0, 0, 'ready')
             .setOrigin(0.5, 0.5)
-            .setScale(0.2)
+			.setScale(0.2)
             .setPosition(this.game.width / 2, this.game.height / 2);
         this.tw_popup = this.tweens.add({
             targets: this.txt_ready,
@@ -207,7 +203,12 @@ function renderScore(params) {
     
     this.txt_ready.setTexture('goal').setScale(0.2);
     this.txt_ready.setVisible(true);
-    this.tw_popup.play(true);
+
+	if (this.tw_popup.isPlaying() == false)
+	{
+		console.log(this.tw_popup);
+		this.tw_popup.play();
+	}
 
     scores.forEach( function(score_txt) {
         // console.log(score_txt);
@@ -218,9 +219,15 @@ function renderScore(params) {
 }
 
 function beginGame() {
-    this.txt_ready.setTexture('kick_off');
-    this.tw_popup.play(true);
-    setTimeout(() => {
+    this.txt_ready.setTexture('kick_off').setScale(0.2);
+
+	if (this.tw_popup.isPlaying() == false)
+	{
+		console.log(this.tw_popup);
+		this.tw_popup.play();
+	}
+
+	setTimeout(() => {
         this.txt_ready.setVisible(false);
     }, 1000);
 }
@@ -233,15 +240,16 @@ function resetLayout() {
 }
 
 function showWinner() {
-    this.txt_ready.setTexture('sprtxt-lose');
+    this.txt_ready.setTexture('sprtxt-lose').setScale(0.5);
     if (gm.getProperty('winner') == gm.getProperty('user_id')) {
-        this.txt_ready.setTexture('sprtxt-win');
+        this.txt_ready.setTexture('sprtxt-win').setScale(0.5);
     }
     this.txt_ready.setVisible(true);
 }
 
-function endGame() {
+function endGame(self) {
+	//kill me
     gm.setProperty({game_state: 2});
-    this.scene.stop(this);
-    this.scene.start('matchwrapper');
+    self.scene.stop(self);
+    self.scene.start('matchwrapper');
 }

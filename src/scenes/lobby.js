@@ -129,23 +129,21 @@ export default class Lobby extends Phaser.Scene {
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
         eventManager.on('lobby-state', this.lobbyState, this);
 
-        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
+		this.game.events.once(Phaser.Core.Events.HIDDEN, () => {
             this.forceExitMatch();
         }, this);
         
-        this.events.once(Phaser.Scenes.SHUTDOWN, () => {
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.find_match_btn.off('pointerup', () => {
                 this.toggleLobbyState();
             });
-            eventManager.off('ready', this.showReadyMember, this);
-            eventManager.off('enter-matchwrapper', this.enterMatchWrapper, this);
-            eventManager.off('lobby-state', this.lobbyState, this);
+            eventManager.off('ready');
+            eventManager.off('enter-matchwrapper');
+            eventManager.off('lobby-state');
 			
 			this.input.off('pointerdown');
 
-            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
-                this.forceExitMatch();
-            }, this);
+			this.game.events.off(Phaser.Core.Events.HIDDEN);
         });
     }
 

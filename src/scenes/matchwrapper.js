@@ -79,6 +79,7 @@ export default class MatchWrapper extends Phaser.Scene {
 
         this.btn_rematch = this.add.sprite(this.game.width * 1/6, 260, 'button-00')
             .setOrigin(0.5, 0.5);
+		this.btn_rematch.setInteractive();
         let txt_rematch = this.add.image(this.btn_rematch.x, this.btn_rematch.y, 'sprtxt-rematch').setOrigin(0.5, 0.5);
         postgame_container.add([btn_exit, txt_exit, this.btn_rematch, txt_rematch]);
 
@@ -117,27 +118,21 @@ export default class MatchWrapper extends Phaser.Scene {
             rematch(this);
         });
 
-        this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
-            lostFocus();
+		this.game.events.once(Phaser.Core.Events.HIDDEN, () => {
+            this.lostFocus(this);
         }, this);
 
-        this.events.once(Phaser.Scenes.SHUTDOWN, () => {
-            eventManager.off('countdown', this.changeCountdown, this);
-            eventManager.off('start_game', this.startGame, this);
-            eventManager.off('enter-loby', this.enterLoby, this);
-            eventManager.off('update-currency', this.updateCurrency, this);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            eventManager.off('countdown');
+            eventManager.off('start_game');
+            eventManager.off('enter-loby');
+            eventManager.off('update-currency');
 
-            btn_exit.off('pointerup', () => {
-                eventManager.emit('exit-to-lobby');
-            });
+            btn_exit.off('pointerup');
     
-            this.btn_rematch.off('pointerup', () => {
-                rematch(this);
-            });
+            this.btn_rematch.off('pointerup');
 
-            this.game.events.off(Phaser.Core.Events.HIDDEN, () => {
-                lostFocus();
-            }, this);
+            this.game.events.off(Phaser.Core.Events.HIDDEN);
         });
     }
 
@@ -176,13 +171,23 @@ export default class MatchWrapper extends Phaser.Scene {
     }
 }
 
-function lostFocus() {
+function lostFocus(self) {
     if (gm.getProperty('game_state') == 1)
-        eventManager.emit('lost_focus');   
+	{
+		gm.setProperty({game_state: 2});
+		self.scene.stop(self);
+		self.scene.start('matchwrapper');
+	}
+	else
+	{
+		gm.setProperty({game_state: 1});
+		self.scene.stop(self);
+        self.scene.start('lobby');
+	}
 }
 
 function rematch(self) {
-    console.log(self);
+    gm.setProperty({game_state: 1, winner: ""});
     self.scene.stop(self);
     self.scene.start('lobby', {rematch: true});
 }
