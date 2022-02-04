@@ -119,7 +119,7 @@ export default class MatchWrapper extends Phaser.Scene {
         });
 
 		this.game.events.once(Phaser.Core.Events.HIDDEN, () => {
-            this.lostFocus(this);
+            lostFocus(this);
         }, this);
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

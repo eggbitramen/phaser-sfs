@@ -54,10 +54,10 @@ export default class Lobby extends Phaser.Scene {
 			}
 		};
 		this.texts = [
-			"The sky above the port was the color of television, tuned to a dead channel.",
-			"`It's not like I'm using,' Case heard someone say, as he shouldered his way ",
-			"through the crowd around the door of the Chat. `It's like my body's developed",
-			"this massive drug deficiency.' It was a Sprawl voice and a Sprawl joke."
+			"Cetaklah gol sebanyak mungkin ke gawang lawan. Pemain yang paling banyak mencetak skor dalam 30 detik akan menjadi pemenang.",
+			"Tekan tombol arah KANAN atau KIRI untuk menggerakkan karakter pemain. Tekan tombol SPACE untuk melompat.",
+			"Tekan tombol Z untuk melambungkan bola ke arah gawang lawan. Tekan tombol X untuk menendang bola lurus ke gawang lawan.",
+			"Pemain juga dapat menggunakan tombol pada layar untuk mengontrol pergerakan karakter pemain."
 		];
 		this.tutorial_txt = this.add.text(this.game.width * 1.1/5, -this.game.height * 0.5/10, this.texts[0], text_prop)
 			.setOrigin(0.5, 0.5)
@@ -129,7 +129,7 @@ export default class Lobby extends Phaser.Scene {
         eventManager.on('enter-matchwrapper', this.enterMatchWrapper, this);
         eventManager.on('lobby-state', this.lobbyState, this);
 
-		this.game.events.once(Phaser.Core.Events.HIDDEN, () => {
+		this.game.events.on(Phaser.Core.Events.HIDDEN, () => {
             this.forceExitMatch();
         }, this);
         
@@ -205,6 +205,7 @@ export default class Lobby extends Phaser.Scene {
 
     forceExitMatch()
     {
+		console.log(this.menu_state);
         if (this.menu_state == 1) {
             this.toggleLobbyState();
         }
