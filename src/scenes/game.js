@@ -136,6 +136,7 @@ export default class GamePlay extends Phaser.Scene
         scoreboard_cont.add(names);
 
         //  buttons
+
         let anch_y = dirt.y + dirt.height / 4;
         let anch_x_offset = dirt.width / 20;
         let bt_left = new Button(this, anch_x_offset * 3, anch_y, 'btn_left', 'left');
