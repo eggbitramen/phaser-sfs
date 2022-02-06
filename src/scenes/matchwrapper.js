@@ -48,10 +48,12 @@ export default class MatchWrapper extends Phaser.Scene {
             }
 
             let field_score = this.add.rectangle(avatar_image.x, avatar_image.y + 70, 100, 40, 0x000000, 0.5).setOrigin(0.5, 0.5);
+			let arc_left = this.add.arc(field_score.x - field_score.width/2, field_score.y, field_score.height/2, 90, 270, false, 0x000000, 0.5);
+			let arc_right = this.add.arc(field_score.x + field_score.width/2, field_score.y, field_score.height/2, -90, 90, false, 0x000000, 0.5);
             let txt_score = this.add.text(field_score.x, field_score.y - field_score.height / 2, 'score').setOrigin(0.5, 0.5).setFontSize(20).setStroke(0x000000, 5);
             let t_score = this.add.text(field_score.x, field_score.y, player.score).setOrigin(0.5, 0.5).setFontSize(25);
             avatar_container.add([avatar_image, avatar_name]);
-            postgame_container.add([field_score, txt_score, t_score]);
+            postgame_container.add([field_score, arc_left, arc_right, txt_score, t_score]);
         }
 
         countdown = this.add.text(0, this.game.height / 3, "5")
@@ -66,11 +68,13 @@ export default class MatchWrapper extends Phaser.Scene {
         let currency_icon = [];
         this.txt_currency = [];
         for (const i in offset) {
-            field_black[i] = this.add.rectangle(120 * offset[i], 150, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
-            currency_icon[i] = this.add.image(field_black[i].x - field_black[i].width * 3/5, field_black[i].y, icname[i]).setOrigin(0.5, 0.5);
+            field_black[i] = this.add.rectangle(150 * offset[i], 150, 180, 60, 0x000000, 0.5).setOrigin(0.5, 0.5);
+			let arc_left = this.add.arc(field_black[i].x - field_black[i].width/2, field_black[i].y, field_black[i].height/2, 90, 270, false, 0x000000, 0.5);
+			let arc_right = this.add.arc(field_black[i].x + field_black[i].width/2, field_black[i].y, field_black[i].height/2, -90, 90, false, 0x000000, 0.5);
+            currency_icon[i] = this.add.image(field_black[i].x - field_black[i].width * 1/2, field_black[i].y, icname[i]).setOrigin(0.5, 0.5);
             this.txt_currency[i] = this.add.text(field_black[i].x, field_black[i].y, '-').setOrigin(0.5, 0.5).setFontSize(30);
             
-            postgame_container.add([field_black[i], currency_icon[i], this.txt_currency[i]]);
+            postgame_container.add([field_black[i], arc_left, arc_right, currency_icon[i], this.txt_currency[i]]);
         }
 
         let btn_exit = this.add.sprite(-this.game.width * 1/6, 260, 'button-00')

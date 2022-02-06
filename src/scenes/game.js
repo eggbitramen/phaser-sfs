@@ -50,7 +50,7 @@ export default class GamePlay extends Phaser.Scene
 		});
 		
         this.game.events.once(Phaser.Core.Events.HIDDEN, () => {    
-            endGame(this);
+            endGame();
         }, this);
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -145,7 +145,7 @@ export default class GamePlay extends Phaser.Scene
         let bt_lo = new Button(this, anch_x_offset * 14, anch_y, 'btn_lo', 'lo');
         let bt_hi = new Button(this, anch_x_offset * 17.5, anch_y, 'btn_hi', 'hi');
 
-        //  popup components
+		//  popup components
         this.txt_ready = this.add.image(0, 0, 'ready')
             .setOrigin(0.5, 0.5)
 			.setScale(0.2)
@@ -159,7 +159,27 @@ export default class GamePlay extends Phaser.Scene
 
         background_cont.add([bg_night, tribune, supporters, field, dirt, goal_backs[0], goal_backs[1], goal_collider[0], goal_collider[1]]);
         foreground_cont.add([light, goal_fronts[0], goal_fronts[1], scoreboard_cont, bt_left, bt_right, bt_jump, bt_lo, bt_hi]);
+		//foreground_cont.add([nt_overlay[0], nt_overlay[1], nt_overlay[2]]);
         foreground_cont.add([this.txt_ready]);
+
+		// bt notes
+		let xoff = 60;
+		let yoff = 50;
+		let nt_over_lo = this.add.circle(bt_lo.x + xoff, bt_lo.y - yoff, 20, 0x000000, 0).setOrigin(0.5, 0.5);
+		let nt_over_hi = this.add.circle(bt_hi.x + xoff, bt_hi.y - yoff, 0, 20, 0x000000, 0).setOrigin(0.5, 0.5);
+		let nt_over_jump = this.add.circle(bt_jump.x + xoff, bt_jump.y - yoff, 0, 20, 0x000000, 0).setOrigin(0.5, 0.5);
+		
+		let nt_overlay = [nt_over_lo, nt_over_hi, nt_over_jump];
+		let nt_txt = [];
+		let nt_txt_content = ["Z", "X", "SPACE"];
+		let nt_txt_size = [30, 30, 20];
+		for (let i in nt_overlay)
+		{
+			nt_txt[i] = this.add.text(nt_overlay[i].x, nt_overlay[i].y, nt_txt_content[i])
+				.setOrigin(0.5, 0.5)
+				.setFontSize(nt_txt_size[i])
+				.setStroke(0x000000, 10);
+		}
 
         //  world bounds and colliders
         let solids = [];
@@ -248,9 +268,9 @@ function showWinner() {
     this.txt_ready.setVisible(true);
 }
 
-function endGame(self) {
+function endGame() {
 	//kill me
     gm.setProperty({game_state: 2});
-    self.scene.stop(self);
-    self.scene.start('matchwrapper');
+    this.scene.stop(this);
+    this.scene.start('matchwrapper');
 }
