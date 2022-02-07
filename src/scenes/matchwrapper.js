@@ -176,6 +176,9 @@ export default class MatchWrapper extends Phaser.Scene {
 }
 
 function lostFocus(self) {
+
+	send('walk_out', null);
+
     if (gm.getProperty('game_state') == 1)
 	{
 		gm.setProperty({game_state: 2});
@@ -194,4 +197,13 @@ function rematch(self) {
     gm.setProperty({game_state: 1, winner: ""});
     self.scene.stop(self);
     self.scene.start('lobby', {rematch: true});
+}
+
+function send(req, obj) {
+	console.log(req + ":" + obj);
+    let cmd = {
+        req: req,
+        obj: obj
+    };
+    eventManager.emit('send', cmd);
 }

@@ -66,6 +66,7 @@ export default class Lobby extends Phaser.Scene {
 
 		let slide_mask = this.add.rectangle(-this.game.width * 1.1/5, this.game.height * 0.5/10, this.game.height * 3/5, this.game.height * 3/5, 0x000000).setOrigin(0.5, 0.5);
 		this.tutorial_cont.add(slide_mask);
+		console.log(slide_mask.width + " : " + slide_mask.height);
 
 		this.dots = [];
 		let dot_offset = -1.5;
@@ -76,8 +77,12 @@ export default class Lobby extends Phaser.Scene {
 			this.dots.push(dot);
 			this.tutorial_cont.add(dot);
 		}
-		this.dots[0].alpha = 1.0;
 
+		this.slide_frame = ['tut_00', 'tut_01', 'tut_02', 'tut_03'];
+		this.slides = this.add.image(slide_mask.x, slide_mask.y, this.slide_frame[0]).setOrigin(0.5);
+		this.tutorial_cont.add(this.slides);
+		
+		this.dots[0].alpha = 1.0;
 		this.tut_index = 0;
         
 		// add events
@@ -120,6 +125,7 @@ export default class Lobby extends Phaser.Scene {
 					}
 					this.dots[this.tut_index].alpha = 1.0;
 					this.tutorial_txt.setText(this.texts[this.tut_index]);
+					this.slides.setTexture(this.slide_frame[this.tut_index]);
 					//image change
 				}
 			}
@@ -185,6 +191,7 @@ export default class Lobby extends Phaser.Scene {
             this.tutorial_cont.setVisible(true);
 
 			this.tutorial_txt.setText(this.texts[this.tut_index]);
+			this.slides.setTexture(this.slide_frame[this.tut_index]);
 			for (var i in this.dots)
 			{
 				if (i == this.tut_index)

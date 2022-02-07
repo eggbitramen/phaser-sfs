@@ -25,6 +25,11 @@ export default class Boot extends Phaser.Scene {
         this.load.image('iccoin', 'wrapper/iccoin.png');
         this.load.image('icdiamond', 'wrapper/icdiamond.png');
 
+		this.load.image('tut_00', 'game/tut_00.png');
+		this.load.image('tut_01', 'game/tut_01.png');
+		this.load.image('tut_02', 'game/tut_02.png');
+		this.load.image('tut_03', 'game/tut_03.png');
+
         this.load.image('ball_shadow', 'game/ball_shadow.png');
         this.load.image('bg_night', 'game/bg_night.png');
         this.load.image('ball', 'game/bola.png');

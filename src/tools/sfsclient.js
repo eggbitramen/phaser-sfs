@@ -200,6 +200,8 @@ export default class SFSClient {
             }
         }
 
+		console.log(object);
+
         sfs.send(new SFS2X.ExtensionRequest(cmd.req, object, gm.getProperties().current_room));
     }
 }

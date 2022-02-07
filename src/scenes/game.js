@@ -50,7 +50,7 @@ export default class GamePlay extends Phaser.Scene
 		});
 		
         this.game.events.once(Phaser.Core.Events.HIDDEN, () => {    
-            endGame();
+            forceEndGame(this);
         }, this);
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -273,4 +273,10 @@ function endGame() {
     gm.setProperty({game_state: 2});
     this.scene.stop(this);
     this.scene.start('matchwrapper');
+}
+
+function forceEndGame(self) {
+	gm.setProperty({game_state: 2});
+    self.scene.stop(self);
+    self.scene.start('matchwrapper');
 }
