@@ -113,6 +113,7 @@ export default class MatchWrapper extends Phaser.Scene {
         eventManager.on('start_game', this.startGame, this);
         eventManager.on('enter-loby', this.enterLoby, this);
         eventManager.on('update-currency', this.updateCurrency, this);
+		eventManager.on('end_game', this.forceEndGame, this);
 
         btn_exit.on('pointerup', () => {
             eventManager.emit('disconnect');
@@ -131,6 +132,7 @@ export default class MatchWrapper extends Phaser.Scene {
             eventManager.off('start_game');
             eventManager.off('enter-loby');
             eventManager.off('update-currency');
+			eventManager.off('end_game');
 
             btn_exit.off('pointerup');
     
@@ -170,9 +172,16 @@ export default class MatchWrapper extends Phaser.Scene {
         else
         {
             this.btn_rematch.setInteractive();
-            console.log("Button on");
-        }
+                    }
     }
+
+	forceEndGame()
+	{
+		gm.setProperty({game_state: 2});
+		this.scene.stop(this);
+		this.scene.start('matchwrapper');
+		console.log("force end game");
+	}
 }
 
 function lostFocus(self) {
@@ -200,7 +209,7 @@ function rematch(self) {
 }
 
 function send(req, obj) {
-	console.log(req + ":" + obj);
+	
     let cmd = {
         req: req,
         obj: obj

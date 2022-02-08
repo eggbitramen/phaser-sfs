@@ -8,7 +8,7 @@ export default class Lobby extends Phaser.Scene {
 
     init(data)
     {
-        console.log(data);
+  
         this.rematch = data.rematch;
     }
 
@@ -65,8 +65,7 @@ export default class Lobby extends Phaser.Scene {
 		this.tutorial_cont.add(this.tutorial_txt);
 
 		let slide_mask = this.add.rectangle(-this.game.width * 1.1/5, this.game.height * 0.5/10, this.game.height * 3/5, this.game.height * 3/5, 0x000000).setOrigin(0.5, 0.5);
-		this.tutorial_cont.add(slide_mask);
-		console.log(slide_mask.width + " : " + slide_mask.height);
+		this.tutorial_cont.add(slide_mask);	
 
 		this.dots = [];
 		let dot_offset = -1.5;
@@ -113,8 +112,7 @@ export default class Lobby extends Phaser.Scene {
 					dir = 1;
 				else
 					dir = -1;
-				console.log('triger');
-
+				
 				let next = this.tut_index + dir;	
 				if ((next >=0 && next <= 3) && this.menu_state == 0)
 				{
@@ -212,8 +210,7 @@ export default class Lobby extends Phaser.Scene {
 
     forceExitMatch()
     {
-		console.log(this.menu_state);
-        if (this.menu_state == 1) {
+	    if (this.menu_state == 1) {
             this.toggleLobbyState();
         }
     }

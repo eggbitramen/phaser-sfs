@@ -22,11 +22,10 @@ export default class Ball extends Phaser.GameObjects.Sprite
 
         this.setScale(1.3);
         this.setOrigin(0.5, 0.5);
-		console.log("diameter : " + this.height / 2);
-
+		
 		this.command = [];
 
-		console.log(this);
+		
 
 		this.warpto = this.scene.tweens.add({
 			targets: this,

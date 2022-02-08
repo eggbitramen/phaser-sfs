@@ -43,14 +43,9 @@ export default class GamePlay extends Phaser.Scene
         eventManager.on('reset_layout', resetLayout, this);
         eventManager.on('update_timer', updateTimer, this);
         eventManager.on('end_game', endGame, this);
-        eventManager.on('winner', showWinner, this);
-
-		this.input.on('pointerdown', function (pointer) {
-			console.log(pointer.x + " : " + pointer.y);
-		});
-		
+        eventManager.on('winner', showWinner, this);		
         this.game.events.once(Phaser.Core.Events.HIDDEN, () => {    
-            forceEndGame(this);
+            lostFocus(this);
         }, this);
 
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -74,8 +69,7 @@ export default class GamePlay extends Phaser.Scene
         let dirt = this.add.image(0, field.y + field.height, 'dirt').setOrigin(0, 0);
         let light = this.add.image(0, 0, 'stadium_light').setOrigin(0, 0);
        
-		console.log(field.y + field.height / 2);
-
+		
         let goal_backs = [];
         goal_backs[0] = this.add.image(0, field.y + field.height * 3 / 5, 'goal_back').setOrigin(0, 1);
         goal_backs[1] = this.add.image(field.width, field.y + field.height * 3 / 5, 'goal_back').setOrigin(1, 1).setFlipX(true);
@@ -227,12 +221,10 @@ function renderScore(params) {
 
 	if (this.tw_popup.isPlaying() == false)
 	{
-		console.log(this.tw_popup);
 		this.tw_popup.play();
 	}
 
     scores.forEach( function(score_txt) {
-        // console.log(score_txt);
         if (score_txt.owner == params.getUtfString('name')) {
             score_txt.setText(String(params.getDouble('new_score')));
         }
@@ -244,7 +236,6 @@ function beginGame() {
 
 	if (this.tw_popup.isPlaying() == false)
 	{
-		console.log(this.tw_popup);
 		this.tw_popup.play();
 	}
 
@@ -275,8 +266,20 @@ function endGame() {
     this.scene.start('matchwrapper');
 }
 
-function forceEndGame(self) {
+function lostFocus(self) {
+
+	send('walk_out', null);
+
 	gm.setProperty({game_state: 2});
     self.scene.stop(self);
     self.scene.start('matchwrapper');
+}
+
+function send(req, obj) {
+	
+    let cmd = {
+        req: req,
+        obj: obj
+    };
+    eventManager.emit('send', cmd);
 }
